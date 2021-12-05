@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+  <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'"> -->
+  <link href="./styles.css" rel="stylesheet">
+  <link rel="stylesheet" href="./lighlight/default.min.css">
+  <link rel="stylesheet" type="text/css" href="jquery-note/jquery.notebook.css">
+  <title>syskedown - 开源、易用的markdown编辑器</title>
+</head>
+
+<body>
+  <div class="markdown">
+    <div id="content"></div>
+  </div>
+  <div class="editor"></div>
+  <!-- You can also require other files to run in this process -->
+  <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+  <script src="./jquery-1.10.2.min.js"></script>
+  <script src="./renderer.js"></script>
+  <script src="./marked.min.js"></script>
+  <script src="./lighlight/highlight.min.js"></script>
+  <script type="text/javascript" src="jquery-note/jquery.notebook.js"></script>
+  <script type="text/javascript">
+      $(document).ready(function() {
+          $('.editor').notebook({
+              autoFocus: true,
+              placeholder: 'Type something awesome...'
+          });
+      });
+  </script>
+</body>
+
+</html>
