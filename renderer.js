@@ -17,7 +17,9 @@ ipcRenderer.send('asynchronous-message', 'ping')
 ipcRenderer.on('open_file', (event, arg) => {
   console.log(arg) 
   console.log(event) 
-  const html = marked.parse(arg);
+  const html = marked.parse(arg, function() {
+      console.log("hello callback")
+  });
   console.log(html)
   content.innerHTML = html;
   hljs.highlightAll()

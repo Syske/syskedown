@@ -181,9 +181,9 @@ let template = [
         label: '段落',
         role: 'help',
         submenu: [{
-            label: 'FeedBack ( 意见反馈 )',
+            label: '编辑器',
             click: function () {
-                electron.shell.openExternal('https://forum.iptchain.net')
+                mainWindow.loadURL(path.join('file://', __dirname, 'codemirror-index.html'))
             }
         }]
     },
@@ -191,9 +191,9 @@ let template = [
         label: '格式',
         role: 'help',
         submenu: [{
-            label: 'FeedBack ( 意见反馈 )',
+            label: '首页',
             click: function () {
-                electron.shell.openExternal('https://forum.iptchain.net')
+                mainWindow.loadURL(path.join('file://', __dirname, 'inedex.html'))
             }
         }]
     },

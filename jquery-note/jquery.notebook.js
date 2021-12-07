@@ -500,7 +500,6 @@
         rawEvents = {
             keydown: function (e) {
                 var elem = this;
-                console.log(e)
                 if (cache.command && e.which === 65) {
                     setTimeout(function () {
                         bubble.show.call(elem);
@@ -553,8 +552,6 @@
                 }
             },
             keyup: function (e) {
-                console.log(e)
-                console.log(this)
                 utils.keyboard.isCommand(e, function () {
                     cache.command = false;
                 }, function () {
@@ -596,11 +593,10 @@
             mouseUp: function (e) {
                 var elem = this;
                 cache.isSelecting = false;
-                var sel = utils.selection.getSelection();
-                console.log(sel)
-                $(this).children().attr('focus', 'false');
+                // var sel = utils.selection.getSelection();
+                // $(this).children().attr('focus', 'false');
                 setTimeout(function () {
-                    $(cache.focusedElement).attr('focus', 'true')
+                    // $(cache.focusedElement).attr('focus', 'true')
                     var s = utils.selection.save();
                     if (s) {
                         if (s.collapsed) {
@@ -702,10 +698,13 @@
                 }
             },
             enterKey: function (e) {
-                const html = marked.parse($(cache.focusedElement).html());
-                console.log(html)
-                $(cache.focusedElement).html(html)
-                console.log(cache.focusedElement)
+                var curel = $(cache.focusedElement);
+                if (curel.attr('marked')!='true') {
+                    curel.attr("marked", "true")
+                    const html = marked.parse(curel.html());
+                    console.log(html)
+                    $(cache.focusedElement).html(html)
+                }
                 if ($(this).attr('editor-mode') === 'inline') {
                     e.preventDefault();
                     e.stopPropagation();
@@ -729,7 +728,7 @@
                 }
                 events.change.call(this);
             },
-            paste: function (e) {
+            paste: function (e) {``
                 var elem = $(this),
                     id = 'jqeditor-temparea',
                     range = utils.selection.save(),

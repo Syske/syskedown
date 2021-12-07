@@ -32,10 +32,16 @@
 
       // 自定义markdown解析器
       var rendererMD = new marked.Renderer();
+      console.log(rendererMD)
       // 标题
-      rendererMD.heading = function (text, level) {
+      rendererMD.heading = function (text, level, raw, slugger) {
+        console.log(text)
+        console.log(raw)
+        console.log(slugger)
+        var id = slugger.slug('heading') 
+        console.log(id)
         var escapedText = text.toLowerCase().replace(/[^\w]+/g, '-');
-        return '<h' + level + ' mdType = \'heading\'><a name="' +
+        return '<h' + level + ' mdType = \'heading\' marked = \'true\'><a name="' +
           escapedText +
           '" class="anchor" href="#' + escapedText +
           '"><span class="header-link"></span></a>' +

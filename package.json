@@ -4,8 +4,8 @@
   "description": "A minimal Electron application",
   "main": "main.js",
   "scripts": {
-     "start": "chcp 65001 && electron . --enable-logging"
-     },
+    "start": "chcp 65001 && electron . --enable-logging"
+  },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
     "Electron",
@@ -18,5 +18,9 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^16.0.2"
+  },
+  "dependencies": {
+    "codemirror": "^5.64.0",
+    "turndown": "^7.1.1"
   }
 }
