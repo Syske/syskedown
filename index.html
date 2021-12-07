@@ -17,19 +17,48 @@
   </div>
   <div class="editor"></div>
   <!-- You can also require other files to run in this process -->
-  <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+  <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
   <script src="./jquery-1.10.2.min.js"></script>
   <script src="./renderer.js"></script>
   <script src="./marked.min.js"></script>
   <script src="./lighlight/highlight.min.js"></script>
   <script type="text/javascript" src="jquery-note/jquery.notebook.js"></script>
   <script type="text/javascript">
-      $(document).ready(function() {
-          $('.editor').notebook({
-              autoFocus: true,
-              placeholder: 'Type something awesome...'
-          });
+    $(document).ready(function () {
+      $('.editor').notebook({
+        autoFocus: true,
+        placeholder: 'Type something awesome...'
       });
+
+      // 自定义markdown解析器
+      var rendererMD = new marked.Renderer();
+      // 标题
+      rendererMD.heading = function (text, level) {
+        var escapedText = text.toLowerCase().replace(/[^\w]+/g, '-');
+        return '<h' + level + ' mdType = \'heading\'><a name="' +
+          escapedText +
+          '" class="anchor" href="#' + escapedText +
+          '"><span class="header-link"></span></a>' +
+          text + '</h' + level + '>';
+      }
+      marked.setOptions({
+        renderer: rendererMD,
+        highlight: function (code, lang) {
+          const hljs = require('highlight.js');
+          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+          return hljs.highlight(code, { language }).value;
+        },
+        langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class.
+        pedantic: false,
+        headerIds: "md",
+        gfm: true,
+        breaks: false,
+        sanitize: false,
+        smartLists: true,
+        smartypants: false,
+        xhtml: false
+      });
+    });
   </script>
 </body>
 
