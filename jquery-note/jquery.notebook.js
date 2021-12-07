@@ -15,7 +15,7 @@
  * https://github.com/jakiestfu/Medium.js/
  */
 
-(function($, d, w) {
+(function ($, d, w) {
 
     /*
      * This module deals with the CSS transforms. As it is not possible to easily
@@ -24,25 +24,25 @@
      * with the others that were previously applied to the element.
      */
 
-    var transform = (function() {
-        var matrixToArray = function(str) {
+    var transform = (function () {
+        var matrixToArray = function (str) {
             if (!str || str == 'none') {
                 return [1, 0, 0, 1, 0, 0];
             }
             return str.match(/(-?[0-9\.]+)/g);
         };
 
-        var getPreviousTransforms = function(elem) {
+        var getPreviousTransforms = function (elem) {
             return elem.css('-webkit-transform') || elem.css('transform') || elem.css('-moz-transform') ||
                 elem.css('-o-transform') || elem.css('-ms-transform');
         };
 
-        var getMatrix = function(elem) {
+        var getMatrix = function (elem) {
             var previousTransform = getPreviousTransforms(elem);
             return matrixToArray(previousTransform);
         };
 
-        var applyTransform = function(elem, transform) {
+        var applyTransform = function (elem, transform) {
             elem.css('-webkit-transform', transform);
             elem.css('-moz-transform', transform);
             elem.css('-o-transform', transform);
@@ -50,7 +50,7 @@
             elem.css('transform', transform);
         };
 
-        var buildTransformString = function(matrix) {
+        var buildTransformString = function (matrix) {
             return 'matrix(' + matrix[0] +
                 ', ' + matrix[1] +
                 ', ' + matrix[2] +
@@ -59,7 +59,7 @@
                 ', ' + matrix[5] + ')';
         };
 
-        var getTranslate = function(elem) {
+        var getTranslate = function (elem) {
             var matrix = getMatrix(elem);
             return {
                 x: parseInt(matrix[4]),
@@ -67,14 +67,14 @@
             };
         };
 
-        var scale = function(elem, _scale) {
+        var scale = function (elem, _scale) {
             var matrix = getMatrix(elem);
             matrix[0] = matrix[3] = _scale;
             var transform = buildTransformString(matrix);
             applyTransform(elem, transform);
         };
 
-        var translate = function(elem, x, y) {
+        var translate = function (elem, x, y) {
             var matrix = getMatrix(elem);
             matrix[4] = x;
             matrix[5] = y;
@@ -82,7 +82,7 @@
             applyTransform(elem, transform);
         };
 
-        var rotate = function(elem, deg) {
+        var rotate = function (elem, deg) {
             var matrix = getMatrix(elem);
             var rad1 = deg * (Math.PI / 180);
             var rad2 = rad1 * -1;
@@ -119,40 +119,40 @@
         options,
         utils = {
             keyboard: {
-                isCommand: function(e, callbackTrue, callbackFalse) {
+                isCommand: function (e, callbackTrue, callbackFalse) {
                     if (isMac && e.metaKey || !isMac && e.ctrlKey) {
                         callbackTrue();
                     } else {
                         callbackFalse();
                     }
                 },
-                isShift: function(e, callbackTrue, callbackFalse) {
+                isShift: function (e, callbackTrue, callbackFalse) {
                     if (e.shiftKey) {
                         callbackTrue();
                     } else {
                         callbackFalse();
                     }
                 },
-                isModifier: function(e, callback) {
+                isModifier: function (e, callback) {
                     var key = e.which,
                         cmd = modifiers[key];
                     if (cmd) {
                         callback.call(this, cmd);
                     }
                 },
-                isEnter: function(e, callback) {
+                isEnter: function (e, callback) {
                     if (e.which === 13) {
                         callback();
                     }
                 },
-                isArrow: function(e, callback) {
+                isArrow: function (e, callback) {
                     if (e.which >= 37 || e.which <= 40) {
                         callback();
                     }
                 }
             },
             html: {
-                addTag: function(elem, tag, focus, editable) {
+                addTag: function (elem, tag, focus, editable) {
                     var newElement = $(d.createElement(tag));
                     newElement.attr('contenteditable', Boolean(editable));
                     newElement.append(' ');
@@ -165,7 +165,7 @@
                 }
             },
             cursor: {
-                set: function(editor, pos, elem) {
+                set: function (editor, pos, elem) {
                     var range;
                     if (d.createRange) {
                         range = d.createRange();
@@ -187,7 +187,7 @@
                 }
             },
             selection: {
-                save: function() {
+                save: function () {
                     if (w.getSelection) {
                         var sel = w.getSelection();
                         if (sel.rangeCount > 0) {
@@ -198,7 +198,7 @@
                     }
                     return null;
                 },
-                restore: function(range) {
+                restore: function (range) {
                     if (range) {
                         if (w.getSelection) {
                             var sel = w.getSelection();
@@ -209,7 +209,7 @@
                         }
                     }
                 },
-                getText: function() {
+                getText: function () {
                     var txt = '';
                     if (w.getSelection) {
                         txt = w.getSelection().toString();
@@ -220,7 +220,7 @@
                     }
                     return txt;
                 },
-                clear: function() {
+                clear: function () {
                     if (window.getSelection) {
                         if (window.getSelection().empty) { // Chrome
                             window.getSelection().empty();
@@ -231,7 +231,7 @@
                         document.selection.empty();
                     }
                 },
-                getContainer: function(sel) {
+                getContainer: function (sel) {
                     if (w.getSelection && sel && sel.commonAncestorContainer) {
                         return sel.commonAncestorContainer;
                     } else if (d.selection && sel && sel.parentElement) {
@@ -239,7 +239,7 @@
                     }
                     return null;
                 },
-                getSelection: function() {
+                getSelection: function () {
                     if (w.getSelection) {
                         return w.getSelection();
                     } else if (d.selection && d.selection.createRange) { // IE
@@ -249,7 +249,7 @@
                 }
             },
             validation: {
-                isUrl: function(url) {
+                isUrl: function (url) {
                     return (/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/).test(url);
                 }
             }
@@ -258,7 +258,7 @@
             /*
              * This is called to position the bubble above the selection.
              */
-            updatePos: function(editor, elem) {
+            updatePos: function (editor, elem) {
                 var sel = w.getSelection(),
                     range = sel.getRangeAt(0),
                     boundary = range.getBoundingClientRect(),
@@ -274,7 +274,7 @@
             /*
              * Updates the bubble to set the active formats for the current selection.
              */
-            updateState: function(editor, elem) {
+            updateState: function (editor, elem) {
                 elem.find('button').removeClass('active');
                 var sel = w.getSelection(),
                     formats = [];
@@ -298,7 +298,7 @@
              * Recursively navigates upwards in the DOM to find all the format
              * tags enclosing the selection.
              */
-            checkForFormatting: function(currentNode, formats) {
+            checkForFormatting: function (currentNode, formats) {
                 var validFormats = ['b', 'i', 'u', 'h1', 'h2', 'ol', 'ul', 'li', 'a'];
                 if (currentNode.nodeName === '#text' ||
                     validFormats.indexOf(currentNode.nodeName.toLowerCase()) != -1) {
@@ -308,7 +308,7 @@
                     bubble.checkForFormatting(currentNode.parentNode, formats);
                 }
             },
-            buildMenu: function(editor, elem) {
+            buildMenu: function (editor, elem) {
                 var ul = utils.html.addTag(elem, 'ul', false, false);
                 for (var cmd in options.modifiers) {
                     var li = utils.html.addTag(ul, 'li', false, false);
@@ -316,7 +316,7 @@
                     btn.attr('editor-command', options.modifiers[cmd]);
                     btn.addClass(options.modifiers[cmd]);
                 }
-                elem.find('button').click(function(e) {
+                elem.find('button').click(function (e) {
                     e.preventDefault();
                     var cmd = $(this).attr('editor-command');
                     events.commands[cmd].call(editor, e);
@@ -328,14 +328,14 @@
                     type: 'text'
                 });
                 var closeBtn = utils.html.addTag(linkArea, 'button', false, false);
-                closeBtn.click(function(e) {
+                closeBtn.click(function (e) {
                     e.preventDefault();
                     var editor = $(this).closest('.editor');
                     $(this).closest('.link-area').hide();
                     $(this).closest('.bubble').find('ul').show();
                 });
             },
-            show: function() {
+            show: function () {
                 var tag = $(this).parent().find('.bubble');
                 if (!tag.length) {
                     tag = utils.html.addTag($(this).parent(), 'div', false, false);
@@ -353,36 +353,36 @@
                 bubble.updatePos($(this), tag);
                 tag.addClass('active');
             },
-            update: function() {
+            update: function () {
                 var tag = $(this).parent().find('.bubble');
                 bubble.updateState(this, tag);
             },
-            clear: function() {
+            clear: function () {
                 var elem = $(this).parent().find('.bubble');
                 if (!elem.hasClass('active')) return;
                 elem.removeClass('active');
                 bubble.hideLinkInput.call(this);
                 bubble.showButtons.call(this);
-                setTimeout(function() {
+                setTimeout(function () {
                     if (elem.hasClass('active')) return;
                     elem.hide();
                 }, 500);
             },
-            hideButtons: function() {
+            hideButtons: function () {
                 $(this).parent().find('.bubble').find('ul').hide();
             },
-            showButtons: function() {
+            showButtons: function () {
                 $(this).parent().find('.bubble').find('ul').show();
             },
-            showLinkInput: function(selection) {
+            showLinkInput: function (selection) {
                 bubble.hideButtons.call(this);
                 var editor = this;
                 var elem = $(this).parent().find('.bubble').find('input[type=text]');
                 var hasLink = elem.closest('.jquery-notebook').find('button.anchor').hasClass('active');
                 elem.unbind('keydown');
-                elem.keydown(function(e) {
+                elem.keydown(function (e) {
                     var elem = $(this);
-                    utils.keyboard.isEnter(e, function() {
+                    utils.keyboard.isEnter(e, function () {
                         e.preventDefault();
                         var url = elem.val();
                         if (utils.validation.isUrl(url)) {
@@ -395,9 +395,9 @@
                         }
                     });
                 });
-                elem.bind('paste', function(e) {
+                elem.bind('paste', function (e) {
                     var elem = $(this);
-                    setTimeout(function() {
+                    setTimeout(function () {
                         var text = elem.val();
                         if (/http:\/\/https?:\/\//.test(text)) {
                             text = text.substring(7);
@@ -413,12 +413,12 @@
                 $(this).parent().find('.link-area').show();
                 elem.val(linkText).focus();
             },
-            hideLinkInput: function() {
+            hideLinkInput: function () {
                 $(this).parent().find('.bubble').find('.link-area').hide();
             }
         },
         actions = {
-            bindEvents: function(elem) {
+            bindEvents: function (elem) {
                 elem.keydown(rawEvents.keydown);
                 elem.keyup(rawEvents.keyup);
                 elem.focus(rawEvents.focus);
@@ -427,13 +427,13 @@
                 elem.mouseup(rawEvents.mouseUp);
                 elem.mousemove(rawEvents.mouseMove);
                 elem.blur(rawEvents.blur);
-                $('body').mouseup(function(e) {
+                $('body').mouseup(function (e) {
                     if (e.target == e.currentTarget && cache.isSelecting) {
                         rawEvents.mouseUp.call(elem, e);
                     }
                 });
             },
-            setPlaceholder: function(e) {
+            setPlaceholder: function (e) {
                 if (/^\s*$/.test($(this).text())) {
                     $(this).empty();
                     var placeholder = utils.html.addTag($(this), 'p').addClass('placeholder');
@@ -443,16 +443,17 @@
                     $(this).find('.placeholder').remove();
                 }
             },
-            removePlaceholder: function(e) {
+            removePlaceholder: function (e) {
                 $(this).find('.placeholder').remove();
             },
-            preserveElementFocus: function() {
+            preserveElementFocus: function () {
                 var anchorNode = w.getSelection() ? w.getSelection().anchorNode : d.activeElement;
                 if (anchorNode) {
                     var current = anchorNode.parentNode,
                         diff = current !== cache.focusedElement,
                         children = this.children,
                         elementIndex = 0;
+                    console.log(current)
                     if (current === this) {
                         current = anchorNode;
                     }
@@ -468,7 +469,7 @@
                     }
                 }
             },
-            setContentArea: function(elem) {
+            setContentArea: function (elem) {
                 var id = $('body').find('.jquery-editor').length + 1;
                 elem.attr('data-jquery-notebook-id', id);
                 var body = $('body');
@@ -480,7 +481,7 @@
                 contentArea.attr('id', 'jquery-notebook-content-' + id);
                 body.append(contentArea);
             },
-            prepare: function(elem, customOptions) {
+            prepare: function (elem, customOptions) {
                 options = customOptions;
                 actions.setContentArea(elem);
                 elem.attr('editor-mode', options.mode);
@@ -497,32 +498,33 @@
             }
         },
         rawEvents = {
-            keydown: function(e) {
+            keydown: function (e) {
                 var elem = this;
+                console.log(e)
                 if (cache.command && e.which === 65) {
-                    setTimeout(function() {
+                    setTimeout(function () {
                         bubble.show.call(elem);
                     }, 50);
                 }
-                utils.keyboard.isCommand(e, function() {
+                utils.keyboard.isCommand(e, function () {
                     cache.command = true;
-                }, function() {
+                }, function () {
                     cache.command = false;
                 });
-                utils.keyboard.isShift(e, function() {
+                utils.keyboard.isShift(e, function () {
                     cache.shift = true;
-                }, function() {
+                }, function () {
                     cache.shift = false;
                 });
-                utils.keyboard.isModifier.call(this, e, function(modifier) {
+                utils.keyboard.isModifier.call(this, e, function (modifier) {
                     if (cache.command) {
                         events.commands[modifier].call(this, e);
                     }
                 });
 
                 if (cache.shift) {
-                    utils.keyboard.isArrow.call(this, e, function() {
-                        setTimeout(function() {
+                    utils.keyboard.isArrow.call(this, e, function () {
+                        setTimeout(function () {
                             var txt = utils.selection.getText();
                             if (txt !== '') {
                                 bubble.show.call(elem);
@@ -532,7 +534,7 @@
                         }, 100);
                     });
                 } else {
-                    utils.keyboard.isArrow.call(this, e, function() {
+                    utils.keyboard.isArrow.call(this, e, function () {
                         bubble.clear.call(elem);
                     });
                 }
@@ -550,10 +552,12 @@
                     events.commands.undo.call(this, e);
                 }
             },
-            keyup: function(e) {
-                utils.keyboard.isCommand(e, function() {
+            keyup: function (e) {
+                console.log(e)
+                console.log(this)
+                utils.keyboard.isCommand(e, function () {
                     cache.command = false;
-                }, function() {
+                }, function () {
                     cache.command = true;
                 });
                 actions.preserveElementFocus.call(this);
@@ -570,11 +574,11 @@
                 }
                 events.change.call(this);
             },
-            focus: function(e) {
+            focus: function (e) {
                 cache.command = false;
                 cache.shift = false;
             },
-            mouseClick: function(e) {
+            mouseClick: function (e) {
                 var elem = this;
                 cache.isSelecting = true;
                 if ($(this).parent().find('.bubble:visible').length) {
@@ -589,10 +593,14 @@
                     }
                 }
             },
-            mouseUp: function(e) {
+            mouseUp: function (e) {
                 var elem = this;
                 cache.isSelecting = false;
-                setTimeout(function() {
+                var sel = utils.selection.getSelection();
+                console.log(sel)
+                $(this).children().attr('focus', 'false');
+                setTimeout(function () {
+                    $(cache.focusedElement).attr('focus', 'true')
                     var s = utils.selection.save();
                     if (s) {
                         if (s.collapsed) {
@@ -604,11 +612,11 @@
                     }
                 }, 50);
             },
-            mouseMove: function(e) {
+            mouseMove: function (e) {
                 mouseX = e.pageX;
                 mouseY = e.pageY;
             },
-            blur: function(e) {
+            blur: function (e) {
                 actions.setPlaceholder.call(this, {
                     focus: false
                 });
@@ -616,42 +624,42 @@
         },
         events = {
             commands: {
-                bold: function(e) {
+                bold: function (e) {
                     e.preventDefault();
                     d.execCommand('bold', false);
                     bubble.update.call(this);
                     events.change.call(this);
                 },
-                italic: function(e) {
+                italic: function (e) {
                     e.preventDefault();
                     d.execCommand('italic', false);
                     bubble.update.call(this);
                     events.change.call(this);
                 },
-                underline: function(e) {
+                underline: function (e) {
                     e.preventDefault();
                     d.execCommand('underline', false);
                     bubble.update.call(this);
                     events.change.call(this);
                 },
-                anchor: function(e) {
+                anchor: function (e) {
                     e.preventDefault();
                     var s = utils.selection.save();
                     bubble.showLinkInput.call(this, s);
                     events.change.call(this);
                 },
-                createLink: function(e, s) {
+                createLink: function (e, s) {
                     utils.selection.restore(s);
                     d.execCommand('createLink', false, e.url);
                     bubble.update.call(this);
                     events.change.call(this);
                 },
-                removeLink: function(e, s) {
+                removeLink: function (e, s) {
                     var el = $(utils.selection.getContainer(s)).closest('a');
                     el.contents().first().unwrap();
                     events.change.call(this);
                 },
-                h1: function(e) {
+                h1: function (e) {
                     e.preventDefault();
                     if ($(window.getSelection().anchorNode.parentNode).is('h1')) {
                         d.execCommand('formatBlock', false, '<p>');
@@ -661,7 +669,7 @@
                     bubble.update.call(this);
                     events.change.call(this);
                 },
-                h2: function(e) {
+                h2: function (e) {
                     e.preventDefault();
                     if ($(window.getSelection().anchorNode.parentNode).is('h2')) {
                         d.execCommand('formatBlock', false, '<p>');
@@ -671,19 +679,19 @@
                     bubble.update.call(this);
                     events.change.call(this);
                 },
-                ul: function(e) {
+                ul: function (e) {
                     e.preventDefault();
                     d.execCommand('insertUnorderedList', false);
                     bubble.update.call(this);
                     events.change.call(this);
                 },
-                ol: function(e) {
+                ol: function (e) {
                     e.preventDefault();
                     d.execCommand('insertOrderedList', false);
                     bubble.update.call(this);
                     events.change.call(this);
                 },
-                undo: function(e) {
+                undo: function (e) {
                     e.preventDefault();
                     d.execCommand('undo', false);
                     var sel = w.getSelection(),
@@ -693,7 +701,11 @@
                     events.change.call(this);
                 }
             },
-            enterKey: function(e) {
+            enterKey: function (e) {
+                const html = marked.parse($(cache.focusedElement).html());
+                console.log(html)
+                $(cache.focusedElement).html(html)
+                console.log(cache.focusedElement)
                 if ($(this).attr('editor-mode') === 'inline') {
                     e.preventDefault();
                     e.stopPropagation();
@@ -703,11 +715,11 @@
                 var sel = utils.selection.getSelection();
                 var elem = $(sel.focusNode.parentElement);
                 var nextElem = elem.next();
-                if(!nextElem.length && elem.prop('tagName') != 'LI') {
+                if (!nextElem.length && elem.prop('tagName') != 'LI') {
                     var tagName = elem.prop('tagName');
-                    if(tagName === 'OL' || tagName === 'UL') {
+                    if (tagName === 'OL' || tagName === 'UL') {
                         var lastLi = elem.children().last();
-                        if(lastLi.length && lastLi.text() === '') {
+                        if (lastLi.length && lastLi.text() === '') {
                             lastLi.remove();
                         }
                     }
@@ -717,7 +729,7 @@
                 }
                 events.change.call(this);
             },
-            paste: function(e) {
+            paste: function (e) {
                 var elem = $(this),
                     id = 'jqeditor-temparea',
                     range = utils.selection.save(),
@@ -734,10 +746,10 @@
                 }
                 tempArea.focus();
 
-                setTimeout(function() {
+                setTimeout(function () {
                     var clipboardContent = '',
                         paragraphs = tempArea.val().split('\n');
-                    for(var i = 0; i < paragraphs.length; i++) {
+                    for (var i = 0; i < paragraphs.length; i++) {
                         clipboardContent += ['<p>', paragraphs[i], '</p>'].join('');
                     }
                     tempArea.val('');
@@ -747,16 +759,16 @@
                     events.change.call(this);
                 }, 500);
             },
-            change: function(e) {
+            change: function (e) {
                 var contentArea = $('#jquery-notebook-content-' + $(this).attr('data-jquery-notebook-id'));
                 contentArea.val($(this).html());
                 var content = contentArea.val();
-                var changeEvent = new CustomEvent('contentChange', { 'detail': { 'content' : content }});
+                var changeEvent = new CustomEvent('contentChange', { 'detail': { 'content': content } });
                 this.dispatchEvent(changeEvent);
             }
         };
 
-    $.fn.notebook = function(options) {
+    $.fn.notebook = function (options) {
         options = $.extend({}, $.fn.notebook.defaults, options);
         actions.prepare(this, options);
         actions.bindEvents(this);
