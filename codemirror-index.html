@@ -1,71 +1,48 @@
 <!doctype html>
 
 <title>CodeMirror: Hard-wrapping Demo</title>
-<meta charset="utf-8"/>
+<meta charset="utf-8" />
 
 <link rel="stylesheet" href="codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="codemirror/addon/display/fullscreen.css">
 <script src="codemirror/lib/codemirror.js"></script>
 <script src="codemirror/mode/markdown/markdown.js"></script>
-<script src="codemirror/addon/wrap/hardwrap.js"></script>
+<script src="codemirror/addon/display/fullscreen.js"></script>
 <style>
   .CodeMirror {
     cursor: text;
     min-height: 1px;
     font-size: 16px;
     line-height: 1.6;
-    }
-    .CodeMirror-gutters {
-      display: none;
-    }
-    .CodeMirror-linenumber {
-      display: none;
-    }
-    .CodeMirror-vscrollbar {
-      overflow-y: hidden;
-    }
-        
+  }
+
+  .CodeMirror-vscrollbar {
+    overflow-y: hidden;
+  }
 </style>
 
 <article>
-<h2>Hard-wrapping Demo</h2>
-<form><textarea id="code" name="code">Lorem ipsum dolor sit amet, vim augue dictas constituto ex,
-sit falli simul viderer te. Graeco scaevola maluisset sit
-ut, in idque viris praesent sea. Ea sea eirmod indoctum
-repudiare. Vel noluisse suscipit pericula ut. In ius nulla
-alienum molestie. Mei essent discere democritum id.
+  <textarea id="code" name="code">Lorem ipsum dolor sit amet, vim augue dictas constituto ex,
+# 一级标题
+## 二级标题
+### 三级标题
+</textarea>
+  <script>
+    var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+      lineNumbers: false,
+      lineWrapping: true,
+      mode: "markdown", 
+      fullScreen: true,
+      extraKeys: {
+        "F11": function (cm) {
+          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+        },
+        "Esc": function (cm) {
+          if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+        }
+      }
+    });
 
-Equidem ponderum expetendis ius in, mea an erroribus
-constituto, congue timeam perfecto ad est. Ius ut primis
-timeam, per in ullum mediocrem. An case vero labitur pri,
-vel dicit laoreet et. An qui prompta conclusionemque, eam
-timeam sapientem in, cum dictas epicurei eu.
-
-Usu cu vide dictas deseruisse, eum choro graece adipiscing
-ut. Cibo qualisque ius ad, et dicat scripta mea, eam nihil
-mentitum aliquando cu. Debet aperiam splendide at quo, ad
-paulo nostro commodo duo. Sea adhuc utinam conclusionemque
-id, quas doming malorum nec ad. Tollit eruditi vivendum ad
-ius, eos soleat ignota ad.
-</textarea></form>
-
-<script>
-var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-  mode: "markdown",
-  lineNumbers: true,
-  extraKeys: {
-    "Ctrl-Q": function(cm) { cm.wrapParagraph(cm.getCursor(), options); }
-  }
-});
-var wait, options = {column: 60}, changing = false;
-editor.on("change", function(cm, change) {
-  if (changing) return;
-  clearTimeout(wait);
-  wait = setTimeout(function() {
-    changing = true;
-    cm.wrapParagraphsInRange(change.from, CodeMirror.changeEnd(change), options);
-    changing = false;
-  }, 300);
-});
-</script>
+  </script>
 
 </article>
