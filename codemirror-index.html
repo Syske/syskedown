@@ -21,28 +21,30 @@
   }
 </style>
 
-<article>
-  <textarea id="code" name="code">Lorem ipsum dolor sit amet, vim augue dictas constituto ex,
-# 一级标题
-## 二级标题
-### 三级标题
-</textarea>
-  <script>
-    var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
-      lineNumbers: false,
-      lineWrapping: true,
-      mode: "markdown", 
-      fullScreen: true,
-      extraKeys: {
-        "F11": function (cm) {
-          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
-        },
-        "Esc": function (cm) {
-          if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+<body>
+  <article>
+    <textarea id="code" name="code">Lorem ipsum dolor sit amet, vim augue dictas constituto ex,
+  # 一级标题
+  ## 二级标题
+  ### 三级标题
+  </textarea>
+    <script>
+      var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+        lineNumbers: false,
+        lineWrapping: true,
+        mode: "markdown", 
+        fullScreen: true,
+        extraKeys: {
+          "F11": function (cm) {
+            cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+          },
+          "Esc": function (cm) {
+            if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+          }
         }
-      }
-    });
-
-  </script>
-
-</article>
+      });
+  
+    </script>
+  
+  </article>
+</body>
