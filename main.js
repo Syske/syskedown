@@ -201,9 +201,9 @@ let template = [
         label: '视图',
         role: 'help',
         submenu: [{
-            label: 'FeedBack ( 意见反馈 )',
+            label: 'hyper-md',
             click: function () {
-                electron.shell.openExternal('https://forum.iptchain.net')
+                mainWindow.loadURL(path.join('file://', __dirname, 'hyper-md.html'))
             }
         }]
     },

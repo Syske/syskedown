@@ -8,12 +8,16 @@
 <script src="codemirror/lib/codemirror.js"></script>
 <script src="codemirror/mode/markdown/markdown.js"></script>
 <script src="codemirror/addon/display/fullscreen.js"></script>
-<style>
+<style type="text/css">
   .CodeMirror {
     cursor: text;
     min-height: 1px;
     font-size: 16px;
     line-height: 1.6;
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 30px;
+    padding-bottom: 100px;
   }
 
   .CodeMirror-vscrollbar {
@@ -22,17 +26,15 @@
 </style>
 
 <body>
-  <article>
-    <textarea id="code" name="code">Lorem ipsum dolor sit amet, vim augue dictas constituto ex,
-  # 一级标题
-  ## 二级标题
-  ### 三级标题
-  </textarea>
+  <content>
+    <textarea id="code" name="code"></textarea>
     <script>
       var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
         lineNumbers: false,
         lineWrapping: true,
-        mode: "markdown", 
+        mode: "markdown",
+        tabSize: 4,
+        indentWithTabs: true,
         fullScreen: true,
         extraKeys: {
           "F11": function (cm) {
@@ -43,8 +45,22 @@
           }
         }
       });
-  
+
+      editor.on("change", function(doc, changeObj) {
+            console.log(doc)
+            console.log(changeObj)
+        });
+        editor.on("renderLine", function(cm, line, elt) {
+          console.log(cm)
+          console.log(line)
+          console.log(elt)
+          var off = CodeMirror.countColumn(line.text, null, cm.getOption("tabSize")) * 2;
+          elt.style.textIndent = "-" + off + "px";
+          elt.style.paddingLeft = (10 + off) + "px";
+          console.log(off)
+        });
+
     </script>
-  
-  </article>
+
+  </content>
 </body>

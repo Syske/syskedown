@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "codemirror": "^5.64.0",
+    "hypermd": "^0.3.11",
     "turndown": "^7.1.1"
   }
 }
