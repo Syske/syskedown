@@ -31,7 +31,7 @@ function createWindow() {
 
     mainWindow = new BrowserWindow(windowOptions);
     console.log(__dirname)
-    mainWindow.loadURL(path.join('file://', __dirname, 'index.html'))
+    mainWindow.loadURL(path.join('file://', __dirname, '../index.html'))
 
     mainWindow.on('closed', function () {
         mainWindow = null
@@ -183,7 +183,7 @@ let template = [
         submenu: [{
             label: '编辑器',
             click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, 'codemirror-index.html'))
+                mainWindow.loadURL(path.join('file://', __dirname, '../codemirror-index.html'))
             }
         }]
     },
@@ -193,7 +193,7 @@ let template = [
         submenu: [{
             label: '首页',
             click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, 'inedex.html'))
+                mainWindow.loadURL(path.join('file://', __dirname, '../inedex.html'))
             }
         }]
     },
@@ -201,9 +201,9 @@ let template = [
         label: '视图',
         role: 'help',
         submenu: [{
-            label: 'hyper-md',
+            label: 'vditor',
             click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, 'hyper-md.html'))
+                mainWindow.loadURL(path.join('file://', __dirname, '../vditor-index.html'))
             }
         }]
     },
