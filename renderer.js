@@ -8,6 +8,7 @@
 
 const { ipcRenderer } = require('electron')
 console.log(ipcRenderer.sendSync('synchronous-message', 'ping')) // prints "pong"
+window.$ = window.jQuery = require("jquery");
 
 ipcRenderer.on('asynchronous-reply', (event, arg) => {
   console.log(arg) // prints "pong"
@@ -17,10 +18,9 @@ ipcRenderer.send('asynchronous-message', 'ping')
 ipcRenderer.on('open_file', (event, arg) => {
   console.log(arg) 
   console.log(event) 
-  const html = marked.parse(arg, function() {
-      console.log("hello callback")
-  });
-  console.log(html)
-  content.innerHTML = html;
-  hljs.highlightAll()
-})
+  const html = marked.parse(arg);
+  console.log(html);
+  $('.editor').html(html);
+  hljs.highlightAll();
+  
+});

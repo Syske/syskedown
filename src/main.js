@@ -1,10 +1,12 @@
-const electron = require('electron')
-const { property } = require('lodash')
+const path = require('path')
+const electron = require("electron")
 const app = electron.app
 const BrowserWindow = electron.BrowserWindow
-const Menu = electron.Menu
-const path = require('path')
 const { ipcMain } = require("electron")
+const Menu = electron.Menu
+const UUID = require("es6-uuid");
+const storage = require('electron-localstorage')
+const { dialog } = require('electron')
 
 if (process.mas) app.setName('syskedown - 开源、易用的markdown编辑器')
 
@@ -21,6 +23,7 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
+            enabledRemoteModule: true,
             preload: path.join('/preload.js')
         }
     }
@@ -31,7 +34,7 @@ function createWindow() {
 
     mainWindow = new BrowserWindow(windowOptions);
     console.log(__dirname)
-    mainWindow.loadURL(path.join('file://', __dirname, '../index.html'))
+    mainWindow.loadURL(path.join('file://', __dirname, '../vditor-index.html'))
 
     mainWindow.on('closed', function () {
         mainWindow = null
@@ -40,6 +43,12 @@ function createWindow() {
     mainWindow.webContents.openDevTools({
         mode: 'bottom'
     });
+    mainWindow.$ = mainWindow.jQuery = require("jquery");
+    const sessionId = UUID(32);
+    console.log("session-id", sessionId);
+    storage.setItem("sessionId", sessionId)
+    storage.setStoragePath(path.join(__dirname, 'db.json'))
+    
 
     // 在主进程中.
     ipcMain.on('asynchronous-message', (event, arg) => {
@@ -50,6 +59,10 @@ function createWindow() {
     ipcMain.on('synchronous-message', (event, arg) => {
         console.log(arg) // prints "ping"
         event.returnValue = 'pong'
+    })
+    ipcMain.on('getFileName', (event, arg) => {
+        console.log("main - getFileName:", arg) // prints "ping"
+        save(arg)
     })
 }
 
@@ -79,9 +92,10 @@ app.on('window-all-closed', function () {
 })
 
 
-function openFile() {
-    const { dialog } = require('electron')
+function openFile(focusedWindow) {
+    
     dialog.showOpenDialog(mainWindow, {
+        title: "打开文件",
         properties: ['openFile'],
         filters: [
             { name: 'Markdown File', extensions: ['md'] },
@@ -94,15 +108,41 @@ function openFile() {
         const fs = require("fs");
         const files = result.filePaths;
         if (files && files.length >= 1) {
-            console.log("file:", files[0]);
-            const content = fs.readFileSync(files[0]);
+            const file = files[0];
+            console.log("file:", file);
+            storage.setItem("file-name", file)
+            console.log(file)
+            const content = fs.readFileSync(file);
             console.log(content.toString());
             console.log(mainWindow)
-            BrowserWindow.getFocusedWindow().webContents.send('open_file', content.toString());
-           }
+            focusedWindow.webContents.send('open_file', content.toString());
+
+        }
 
     }).catch(err => {
         console.log(err)
+    })
+}
+
+function save(path) {
+    console.log("main - path:", path)
+    dialog.showSaveDialog({
+        title: '保存文件',
+        defaultPath: path,
+        filters: [
+            { name: 'Markdown File', extensions: ['md'] },
+            { name: 'All Files', extensions: ['*'] }
+        ]
+    }).then(result => {
+        console.log(result);
+        if (!result.canceled) {
+            BrowserWindow.getFocusedWindow().webContents.send('save-file', result.filePath);
+        } else {
+            console.log("user canceled")
+        }
+        
+    }).catch(err => {
+        console.log(err);
     })
 }
 
@@ -119,12 +159,19 @@ let template = [
             accelerator: 'CmdOrCtrl+O',
             role: 'open',
             click: function (item, focusedWindow) {
-            openFile();
+                openFile(focusedWindow);
             }
         }, {
-            label: 'Copy (复制)',
-            accelerator: 'CmdOrCtrl+C',
-            role: 'copy'
+            label: '保存',
+            accelerator: 'CmdOrCtrl+S',
+            role: 'save',
+            click: function (item, focusedWindow) {
+                console.log(focusedWindow)
+                console.log(item)
+                console.log(focusedWindow.webContents.send('file_name'))
+                console.log(storage.getItem("file-name"))
+                //save(storage.getItem("file-name"), focusedWindow)
+            }
         }, {
             label: 'Paste ( 粘贴 )',
             accelerator: 'CmdOrCtrl+V',
@@ -181,6 +228,48 @@ let template = [
         label: '段落',
         role: 'help',
         submenu: [{
+            label: '一级目录',
+            accelerator: 'CmdOrCtrl+1',
+            click: function () {
+                console.log("一级目录")
+            }
+        }, {
+            label: '二级目录',
+            accelerator: 'CmdOrCtrl+2',
+            click: function () {
+                console.log("二级目录")
+            }
+        }, {
+            label: '三级目录',
+            accelerator: 'CmdOrCtrl+3',
+            click: function () {
+                console.log("三级目录")
+            }
+        }, {
+            label: '四级目录',
+            accelerator: 'CmdOrCtrl+4',
+            click: function () {
+                console.log("四级目录")
+            }
+        }, {
+            label: '五级目录',
+            accelerator: 'CmdOrCtrl+5',
+            click: function () {
+                console.log("五级目录")
+            }
+        }, {
+            label: '六级目录',
+            accelerator: 'CmdOrCtrl+6',
+            click: function () {
+                console.log("六级目录")
+            }
+        }, {
+            label: '代码块',
+            accelerator: 'CmdOrCtrl+shift+k',
+            click: function () {
+                console.log("代码块")
+            }
+        }, {
             label: '编辑器',
             click: function () {
                 mainWindow.loadURL(path.join('file://', __dirname, '../codemirror-index.html'))
@@ -211,9 +300,9 @@ let template = [
         label: '主题',
         role: 'help',
         submenu: [{
-            label: 'FeedBack ( 意见反馈 )',
-            click: function () {
-                electron.shell.openExternal('https://forum.iptchain.net')
+            label: '主题样式',
+            click: function ()  {
+                   
             }
         }]
     },

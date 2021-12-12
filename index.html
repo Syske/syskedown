@@ -17,8 +17,6 @@
   </div>
   <div class="editor"></div>
   <!-- You can also require other files to run in this process -->
-  <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
-  <script src="./jquery-1.10.2.min.js"></script>
   <script src="./renderer.js"></script>
   <script src="./marked.min.js"></script>
   <script src="./lighlight/highlight.min.js"></script>
@@ -50,7 +48,6 @@
       marked.setOptions({
         renderer: rendererMD,
         highlight: function (code, lang) {
-          const hljs = require('highlight.js');
           const language = hljs.getLanguage(lang) ? lang : 'plaintext';
           return hljs.highlight(code, { language }).value;
         },
