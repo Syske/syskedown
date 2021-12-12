@@ -1,4 +1,3 @@
-import Vditor from 'vditor'
 const path = require('path')
 const fs = require("fs");
 const storage = require('electron-localstorage')
@@ -13,6 +12,7 @@ window.onload = function () {
     cdn: './vditor',
     placeholder: 'Hello, Vditor!',
     typewriterMode: true,
+    toolbar: [],
     toolbarConfig: {
       hide: true
     },
@@ -54,8 +54,13 @@ ipcRenderer.on('file_name', (event, arg) => {
   var match = reg.exec($("h1, h2, h3, h4, h5, h6")[0].id)
   console.log(match)
   var fileName = match[1]
-  if (fileName == null || fileName == 'undefined' || fileName =='') {
-      fileName = "Untitled"
+  if (fileName == null || fileName == 'undefined' || fileName == '') {
+    fileName = "Untitled"
   }
   event.sender.send('getFileName', fileName)
-})
+});
+
+ipcRenderer.on('md-hot-key', (event, arg) => {
+  console.log(arg)
+  vditor.processHeading(arg);
+});

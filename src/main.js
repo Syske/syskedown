@@ -168,7 +168,7 @@ let template = [
             click: function (item, focusedWindow) {
                 console.log(focusedWindow)
                 console.log(item)
-                console.log(focusedWindow.webContents.send('file_name'))
+                focusedWindow.webContents.send('file_name');
                 console.log(storage.getItem("file-name"))
                 //save(storage.getItem("file-name"), focusedWindow)
             }
@@ -230,38 +230,44 @@ let template = [
         submenu: [{
             label: '一级目录',
             accelerator: 'CmdOrCtrl+1',
-            click: function () {
-                console.log("一级目录")
+            click: function (focusedWindow) {
+                console.log("一级目录");
+                BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "# ");
             }
         }, {
             label: '二级目录',
             accelerator: 'CmdOrCtrl+2',
             click: function () {
                 console.log("二级目录")
+                BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "## ");
             }
         }, {
             label: '三级目录',
             accelerator: 'CmdOrCtrl+3',
             click: function () {
                 console.log("三级目录")
+                BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "### ");
             }
         }, {
             label: '四级目录',
             accelerator: 'CmdOrCtrl+4',
             click: function () {
                 console.log("四级目录")
+                BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "#### ");
             }
         }, {
             label: '五级目录',
             accelerator: 'CmdOrCtrl+5',
             click: function () {
                 console.log("五级目录")
+                BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "##### ");
             }
         }, {
             label: '六级目录',
             accelerator: 'CmdOrCtrl+6',
             click: function () {
                 console.log("六级目录")
+                BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "###### ");
             }
         }, {
             label: '代码块',
