@@ -7,6 +7,7 @@ const Menu = electron.Menu
 const UUID = require("es6-uuid");
 const storage = require('electron-localstorage')
 const { dialog } = require('electron')
+storage.setStoragePath(path.join(__dirname, 'db.json'))
 
 if (process.mas) app.setName('syskedown - 开源、易用的markdown编辑器')
 
@@ -47,7 +48,6 @@ function createWindow() {
     const sessionId = UUID(32);
     console.log("session-id", sessionId);
     storage.setItem("sessionId", sessionId)
-    storage.setStoragePath(path.join(__dirname, 'db.json'))
     
 
     // 在主进程中.
@@ -136,6 +136,7 @@ function save(path) {
     }).then(result => {
         console.log(result);
         if (!result.canceled) {
+            storage.setItem("file-name", result.filePath)
             BrowserWindow.getFocusedWindow().webContents.send('save-file', result.filePath);
         } else {
             console.log("user canceled")
@@ -168,7 +169,14 @@ let template = [
             click: function (item, focusedWindow) {
                 console.log(focusedWindow)
                 console.log(item)
-                focusedWindow.webContents.send('file_name');
+                var fileName = storage.getItem("file-name")
+                console.log("fileName: ", fileName)
+                if (fileName === undefined || fileName === null || fileName === '') {
+                    focusedWindow.webContents.send('file_name');
+                } else {
+                    focusedWindow.webContents.send('save-file', fileName);
+                }
+                
                 console.log(storage.getItem("file-name"))
                 //save(storage.getItem("file-name"), focusedWindow)
             }

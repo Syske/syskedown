@@ -27,7 +27,8 @@
     "babel-preset-es2015": "^6.24.1",
     "electron": "^16.0.4",
     "electron-localstorage": "^1.0.5",
-    "es6-uuid": "^1.0.1"
+    "es6-uuid": "^1.0.1",
+    "jquery": "^3.6.0"
   },
   "dependencies": {
     "codemirror": "^5.64.0",
