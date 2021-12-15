@@ -7,6 +7,7 @@ const Menu = electron.Menu
 const UUID = require("es6-uuid");
 const storage = require('electron-localstorage')
 const { dialog } = require('electron')
+storage.setStoragePath(path.join(__dirname, 'db.json'))
 
 if (process.mas) app.setName('syskedown - 开源、易用的markdown编辑器')
 
@@ -47,7 +48,6 @@ function createWindow() {
     const sessionId = UUID(32);
     console.log("session-id", sessionId);
     storage.setItem("sessionId", sessionId)
-    storage.setStoragePath(path.join(__dirname, 'db.json'))
     
 
     // 在主进程中.
@@ -136,6 +136,7 @@ function save(path) {
     }).then(result => {
         console.log(result);
         if (!result.canceled) {
+            storage.setItem("file-name", result.filePath)
             BrowserWindow.getFocusedWindow().webContents.send('save-file', result.filePath);
         } else {
             console.log("user canceled")
@@ -155,6 +156,13 @@ let template = [
     {
         label: '文件(F)',
         submenu: [{
+            label: '新建',
+            accelerator: 'CmdOrCtrl+N',
+            role: 'new',
+            click: function (item, focusedWindow) {
+                console.log("新建")
+            }
+        }, {
             label: '打开',
             accelerator: 'CmdOrCtrl+O',
             role: 'open',
@@ -168,17 +176,21 @@ let template = [
             click: function (item, focusedWindow) {
                 console.log(focusedWindow)
                 console.log(item)
-                focusedWindow.webContents.send('file_name');
+                var fileName = storage.getItem("file-name")
+                console.log("fileName: ", fileName)
+                if (fileName === undefined || fileName === null || fileName === '') {
+                    focusedWindow.webContents.send('file_name');
+                } else {
+                    focusedWindow.webContents.send('save-file', fileName);
+                }
+                
                 console.log(storage.getItem("file-name"))
                 //save(storage.getItem("file-name"), focusedWindow)
             }
         }, {
-            label: 'Paste ( 粘贴 )',
-            accelerator: 'CmdOrCtrl+V',
-            role: 'paste'
-        }, {
-            label: 'Reload ( 重新加载 )',
+            label: '重新加载',
             accelerator: 'CmdOrCtrl+R',
+            role: 'reload',
             click: function (item, focusedWindow) {
                 if (focusedWindow) {
                     // on reload, start fresh and close any old
@@ -193,35 +205,45 @@ let template = [
                     focusedWindow.reload()
                 }
             }
+        }, {
+            type: 'separator'
+        }, {
+            label: 'Minimize ( 最小化 )',
+            accelerator: 'CmdOrCtrl+M',
+            role: 'minimize'
+        }, {
+            type: 'separator'
+        }, {
+            label: 'Close ( 关闭 )',
+            accelerator: 'CmdOrCtrl+W',
+            role: 'close'
         }]
     },
     {
         label: '编辑',
         role: 'window',
         submenu: [{
-            label: 'Minimize ( 最小化 )',
-            accelerator: 'CmdOrCtrl+M',
-            role: 'minimize'
+            label: '撤销',
+            accelerator: 'CmdOrCtrl+Z',
+            role: 'undo'
         }, {
-            label: 'Close ( 关闭 )',
-            accelerator: 'CmdOrCtrl+W',
-            role: 'close'
-        }, {
-            label: '切换开发者工具',
-            accelerator: (function () {
-                if (process.platform === 'darwin') {
-                    return 'Alt+Command+I'
-                } else {
-                    return 'Ctrl+Shift+I'
-                }
-            })(),
-            click: function (item, focusedWindow) {
-                if (focusedWindow) {
-                    focusedWindow.toggleDevTools()
-                }
-            }
+            label: '重做',
+            accelerator: 'CmdOrCtrl+Y',
+            role: 'paste'
         }, {
             type: 'separator'
+        }, {
+            label: '剪贴',
+            accelerator: 'CmdOrCtrl+X',
+            role: 'cut'
+        }, {
+            label: '复制',
+            accelerator: 'CmdOrCtrl+V',
+            role: 'cut'
+        }, {
+            label: '粘贴',
+            accelerator: 'CmdOrCtrl+V',
+            role: 'paste'
         }]
     },
     {
@@ -270,6 +292,8 @@ let template = [
                 BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "###### ");
             }
         }, {
+            type: 'separator'
+        }, {
             label: '代码块',
             accelerator: 'CmdOrCtrl+shift+k',
             click: function () {
@@ -286,6 +310,36 @@ let template = [
         label: '格式',
         role: 'help',
         submenu: [{
+            label: '加粗',
+            accelerator: 'CmdOrCtrl+B',
+            role: 'blod'
+        }, {
+            label: '斜线',
+            accelerator: 'CmdOrCtrl+I',
+            role: 'i'
+        }, {
+            label: '下划线',
+            accelerator: 'CmdOrCtrl+U',
+            role: 'underline'
+        }, {
+            label: '代码',
+            accelerator: 'CmdOrCtrl+shift+`',
+            role: 'code'
+        }, {
+            label: '删除线',
+            accelerator: 'CmdOrCtrl+alt+D',
+            role: 'deleteline'
+        }, {
+            label: '超链接',
+            accelerator: 'CmdOrCtr+K',
+            role: 'link'
+        }, {
+            label: '图片',
+            accelerator: 'CmdOrCtrl+alt+I',
+            role: 'img'
+        }, {
+            type: 'separator'
+        }, {
             label: '首页',
             click: function () {
                 mainWindow.loadURL(path.join('file://', __dirname, '../inedex.html'))
@@ -296,6 +350,20 @@ let template = [
         label: '视图',
         role: 'help',
         submenu: [{
+            label: '切换开发者工具',
+            accelerator: (function () {
+                if (process.platform === 'darwin') {
+                    return 'Alt+Command+I'
+                } else {
+                    return 'Ctrl+Shift+I'
+                }
+            })(),
+            click: function (item, focusedWindow) {
+                if (focusedWindow) {
+                    focusedWindow.toggleDevTools()
+                }
+            }
+        }, {
             label: 'vditor',
             click: function () {
                 mainWindow.loadURL(path.join('file://', __dirname, '../vditor-index.html'))
@@ -321,9 +389,19 @@ let template = [
         label: '帮助',
         role: 'help',
         submenu: [{
-            label: 'FeedBack ( 意见反馈 )',
+            label: '项目信息',
+            click: function ()  {
+                electron.shell.openExternal('https://github.com/Syske/syskedown')
+            }
+        }, {
+            label: '意见反馈',
             click: function () {
-                electron.shell.openExternal('https://forum.iptchain.net')
+                electron.shell.openExternal('https://github.com/Syske/syskedown/issues')
+            }
+        }, {
+            label: '关于',
+            click: function ()  {
+                   
             }
         }]
     }
