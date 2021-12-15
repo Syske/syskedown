@@ -300,6 +300,11 @@ let template = [
             click: function () {
                 mainWindow.loadURL(path.join('file://', __dirname, '../vditor-index.html'))
             }
+        }, {
+            label: 'hyperMD',
+            click: function () {
+                mainWindow.loadURL(path.join('file://', __dirname, '../index-hyperMD.html'))
+            }
         }]
     },
     {
