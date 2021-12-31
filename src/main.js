@@ -2,7 +2,7 @@ const path = require('path')
 const electron = require("electron")
 const app = electron.app
 const BrowserWindow = electron.BrowserWindow
-const { ipcMain } = require("electron")
+const { ipcMain, nativeTheme } = require("electron")
 const Menu = electron.Menu
 const UUID = require("es6-uuid");
 const storage = require('electron-localstorage')
@@ -21,6 +21,7 @@ function createWindow() {
         minWidth: 1220,
         minHeight: 780,
         title: app.getName(),
+        themeSource: 'dark',
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
@@ -89,7 +90,20 @@ app.on('window-all-closed', function () {
     let reopenMenuItem = findReopenMenuItem()
     if (reopenMenuItem) reopenMenuItem.enabled = true
     app.quit()
-})
+});
+
+ipcMain.handle('dark-mode:toggle', () => {
+    if (nativeTheme.shouldUseDarkColors) {
+        nativeTheme.themeSource = 'light'
+    } else {
+        nativeTheme.themeSource = 'dark'
+    }
+    return nativeTheme.shouldUseDarkColors;
+});
+
+ipcMain.handle('dark-mode:system', () => {
+    nativeTheme.themeSource = 'system'
+});
 
 
 function openFile(focusedWindow) {
@@ -225,11 +239,17 @@ let template = [
         submenu: [{
             label: '撤销',
             accelerator: 'CmdOrCtrl+Z',
-            role: 'undo'
+            click: function () {
+                console.log("撤销");
+                BrowserWindow.getFocusedWindow().webContents.send('md-hot-key-no-value', "undo");
+            }
         }, {
             label: '重做',
             accelerator: 'CmdOrCtrl+Y',
-            role: 'paste'
+            click: function () {
+                console.log("重做");
+                BrowserWindow.getFocusedWindow().webContents.send('md-hot-key-no-value', "redo");
+            }
         }, {
             type: 'separator'
         }, {
@@ -239,10 +259,10 @@ let template = [
         }, {
             label: '复制',
             accelerator: 'CmdOrCtrl+V',
-            role: 'cut'
+            role: 'copy'
         }, {
             label: '粘贴',
-            accelerator: 'CmdOrCtrl+V',
+            accelerator: 'CmdOrCtrl+P',
             role: 'paste'
         }]
     },
@@ -252,7 +272,7 @@ let template = [
         submenu: [{
             label: '一级目录',
             accelerator: 'CmdOrCtrl+1',
-            click: function (focusedWindow) {
+            click: function () {
                 console.log("一级目录");
                 BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "# ");
             }
@@ -295,7 +315,7 @@ let template = [
             type: 'separator'
         }, {
             label: '代码块',
-            accelerator: 'CmdOrCtrl+shift+k',
+            accelerator: 'CmdOrCtrl+Shift+k',
             click: function () {
                 console.log("代码块")
             }
@@ -311,32 +331,32 @@ let template = [
         role: 'help',
         submenu: [{
             label: '加粗',
-            accelerator: 'CmdOrCtrl+B',
-            role: 'blod'
+            accelerator: 'CmdOrCtrl+B'
+      
         }, {
             label: '斜线',
-            accelerator: 'CmdOrCtrl+I',
-            role: 'i'
+            accelerator: 'CmdOrCtrl+I' 
+
         }, {
             label: '下划线',
-            accelerator: 'CmdOrCtrl+U',
-            role: 'underline'
+            accelerator: 'CmdOrCtrl+U'
+
         }, {
             label: '代码',
-            accelerator: 'CmdOrCtrl+shift+`',
-            role: 'code'
+            accelerator: 'CmdOrCtrl+shift+`'
+            
         }, {
             label: '删除线',
-            accelerator: 'CmdOrCtrl+alt+D',
-            role: 'deleteline'
+            accelerator: 'CmdOrCtrl+alt+D'
+
         }, {
             label: '超链接',
-            accelerator: 'CmdOrCtr+K',
-            role: 'link'
+            accelerator: 'CmdOrCtr+K'
+            
         }, {
             label: '图片',
-            accelerator: 'CmdOrCtrl+alt+I',
-            role: 'img'
+            accelerator: 'CmdOrCtrl+alt+I'
+            
         }, {
             type: 'separator'
         }, {
@@ -381,7 +401,13 @@ let template = [
         submenu: [{
             label: '主题样式',
             click: function ()  {
-                   
+                
+            }
+        }, {
+            label: '主题切换',
+            click: function ()  {
+                console.log(nativeTheme.themeSource)
+                BrowserWindow.getFocusedWindow().webContents.send('theme-chanage');
             }
         }]
     },

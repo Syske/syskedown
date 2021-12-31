@@ -23,3 +23,11 @@ npm install
 npm start
 ```
 
+
+
+### package
+
+```
+electron-packager . 'syskedown-editer' --platform=win32 --arch=x64 --icon=icon.ico --out=./out --asar --app-version=0.0.1
+```
+

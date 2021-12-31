@@ -51,7 +51,7 @@ ipcRenderer.on('open_file', (event, arg) => {
 ipcRenderer.on('file_name', (event, arg) => {
   console.log(arg) // prints "ping"
   var reg = /ir-(.*)_[0-9]{0,2}/;
-  var match = reg.exec($("h1, h2, h3, h4, h5, h6")[0].id)
+  var match = reg.exec($("h1, h2, h3, h4, h5, h6, p")[0].id)
   console.log(match)
   var fileName = match[1]
   if (fileName == null || fileName == 'undefined' || fileName == '') {
@@ -61,6 +61,31 @@ ipcRenderer.on('file_name', (event, arg) => {
 });
 
 ipcRenderer.on('md-hot-key', (event, arg) => {
+  console.log(event)
   console.log(arg)
   vditor.processHeading(arg);
+});
+
+ipcRenderer.on('md-hot-key-no-value', (event, arg) => {
+  console.log(arg)
+  console.log(event)
+  if (arg === 'undo') {
+    vditor.vditor.undo.undo(vditor.vditor)
+  }
+  if (arg === 'redo') {
+    vditor.vditor.undo.redo(vditor.vditor)
+  }
+  
+});
+
+ipcRenderer.on('theme-chanage', () => {
+  const isDarkMode = ipcRenderer.invoke('dark-mode:toggle')
+  console.log("isDarkMode:", isDarkMode);
+  if (isDarkMode) {
+    window.vditor.setTheme('dark', 'dark',  'native');
+    document.querySelector('body').style.backgroundColor='#2f363d'
+  } else {
+    window.vditor.setTheme('light', 'light', 'github');
+    document.querySelector('body').style.backgroundColor=''
+  }
 });

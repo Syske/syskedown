@@ -3,8 +3,9 @@
 html,
 body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    background: #EEE;
     min-height: 100%;
+    margin: 0px;
+    padding: 0px;
 }
 
 a {
@@ -21,11 +22,11 @@ article,
     max-width: 1200px;
 }
 
-.CodeMirror {
+/* .CodeMirror {
     border: 1px solid #999;
     border-radius: 5px;
     box-shadow: 0 1px 5px #AAA;
-}
+} */
 
 .tools {
     margin-bottom: 1em;
