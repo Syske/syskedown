@@ -36,15 +36,12 @@ function createWindow() {
 
     mainWindow = new BrowserWindow(windowOptions);
     console.log(__dirname)
-    mainWindow.loadURL(path.join('file://', __dirname, '../vditor-index.html'))
+    mainWindow.loadURL(path.join('file://', __dirname, '../index.html'))
 
     mainWindow.on('closed', function () {
         mainWindow = null
     })
 
-    mainWindow.webContents.openDevTools({
-        mode: 'bottom'
-    });
     mainWindow.$ = mainWindow.jQuery = require("jquery");
     const sessionId = UUID(32);
     console.log("session-id", sessionId);
@@ -319,11 +316,6 @@ let template = [
             click: function () {
                 console.log("代码块")
             }
-        }, {
-            label: '编辑器',
-            click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../codemirror-index.html'))
-            }
         }]
     },
     {
@@ -359,11 +351,6 @@ let template = [
             
         }, {
             type: 'separator'
-        }, {
-            label: '首页',
-            click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../inedex.html'))
-            }
         }]
     },
     {
@@ -380,19 +367,18 @@ let template = [
             })(),
             click: function (item, focusedWindow) {
                 if (focusedWindow) {
-                    focusedWindow.toggleDevTools()
+                    focusedWindow.webContents.openDevTools({
+                        mode: 'bottom'
+                    });
                 }
             }
         }, {
-            label: 'vditor',
+            label: '显示/隐藏侧边栏',
+            accelerator: 'CmdOrCtrl+shift+L',
             click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../vditor-index.html'))
-            }
-        }, {
-            label: 'hyperMD',
-            click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../index-hyperMD.html'))
-            }
+                console.log("撤销");
+                BrowserWindow.getFocusedWindow().webContents.send('md-hot-key-no-value', "sidebar");
+            }            
         }]
     },
     {

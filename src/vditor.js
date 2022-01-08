@@ -6,9 +6,8 @@ window.$ = window.jQuery = require("jquery");
 storage.setStoragePath(path.join(__dirname, './dist/db.json'))
 
 // new VConsole()
-var vditor;
-window.onload = function () {
-  vditor = new Vditor('vditor', {
+const initVditor = (language) => {
+  window.vditor = new Vditor('vditor', {
     cdn: './vditor',
     placeholder: 'Hello, Vditor!',
     typewriterMode: true,
@@ -21,8 +20,16 @@ window.onload = function () {
       type: 'text',
     }
   });
-  document.getElementById('vditor').append(vditor);
-}
+};
+
+$(function() {
+  initVditor('zh_CN')
+  window.setLang = (language) => {
+    window.vditor.destroy()
+    initVditor(language)
+  }
+});
+
 
 const { ipcRenderer } = require('electron')
 
@@ -69,11 +76,22 @@ ipcRenderer.on('md-hot-key', (event, arg) => {
 ipcRenderer.on('md-hot-key-no-value', (event, arg) => {
   console.log(arg)
   console.log(event)
+  // 撤销 ctrl-z
   if (arg === 'undo') {
     vditor.vditor.undo.undo(vditor.vditor)
   }
+  // 重做 ctrl-y
   if (arg === 'redo') {
     vditor.vditor.undo.redo(vditor.vditor)
+  }
+  // 侧边栏处理
+  if (arg === 'sidebar') {
+    var siderbar_show = $('.vditor-outline').css('display')
+    if (siderbar_show === 'none') {
+      $('.vditor-outline').css('display', 'block');
+    } else {
+      $('.vditor-outline').css('display', 'none');
+    }    
   }
   
 });
