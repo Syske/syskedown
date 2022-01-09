@@ -7,7 +7,7 @@
     "start": "chcp 65001 && electron . --enable-logging",
     "build": "babel ./src/main.js -o ./dist/main.js",
     "build-vditor": "babel ./src/vditor.js -o ./dist/vditor.js",
-    "package": "electron-packager . syskedown-editer --platform=win32 --arch=x64 --icon=icon.ico --out=./out --asar --app-version=0.0.1"
+    "package": "electron-packager . syskedown-editer --platform=win32 --arch=x64 --out=./out --icon=icon.ico --overwrite --asar --app-version=0.0.1"
   },
   "repository": {
     "type": "git",
