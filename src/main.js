@@ -1,4 +1,5 @@
 const path = require('path')
+const fs = require("fs");
 const electron = require("electron")
 const app = electron.app
 const BrowserWindow = electron.BrowserWindow
@@ -20,7 +21,8 @@ function createWindow() {
         height: 780,
         minWidth: 1220,
         minHeight: 780,
-        title: app.getName(),
+        icon: path.join(__dirname, '../icon.ico'),
+        title: 'syskedown - 开源、易用的markdown编辑器',
         themeSource: 'dark',
         webPreferences: {
             nodeIntegration: true,
@@ -31,67 +33,86 @@ function createWindow() {
     }
 
     if (process.platform === 'linux') {
-        windowOptions.icon = path.join(__dirname, '/app/ico/your-ico.png')
+        windowOptions.icon = path.join(__dirname, '/icon.ico')
     }
 
     mainWindow = new BrowserWindow(windowOptions);
-    console.log(__dirname)
-    mainWindow.loadURL(path.join('file://', __dirname, '../vditor-index.html'))
+    console.log("__dirname: ", __dirname)
+    mainWindow.loadURL(path.join('file://', __dirname, '../index.html'))
 
     mainWindow.on('closed', function () {
         mainWindow = null
     })
-
-    mainWindow.webContents.openDevTools({
-        mode: 'bottom'
-    });
+    // jquery
     mainWindow.$ = mainWindow.jQuery = require("jquery");
+    // 生成用户会话id
     const sessionId = UUID(32);
     console.log("session-id", sessionId);
-    storage.setItem("sessionId", sessionId)
-    
+    // 存储用户会话id
+    storage.setItem("sessionId", sessionId);
 
-    // 在主进程中.
-    ipcMain.on('asynchronous-message', (event, arg) => {
-        console.log(arg) // prints "ping"
-        event.reply('asynchronous-reply', 'pong')
-    })
+    // 加载完成后触发
+    mainWindow.webContents.on('did-finish-load', () => {
+        const filePath = storage.getItem("file-name");
+        console.log("filePath:", filePath);
+        console.log("existsSync: ", fs.existsSync(filePath))
+        if (fs.existsSync(filePath)) {
+            const content = fs.readFileSync(filePath);
+            console.log("content", content.toString())
+            // 初始化文件
+            mainWindow.webContents.send('init-content', content.toString());
+        }
+    });
 
-    ipcMain.on('synchronous-message', (event, arg) => {
-        console.log(arg) // prints "ping"
-        event.returnValue = 'pong'
-    })
-    ipcMain.on('getFileName', (event, arg) => {
-        console.log("main - getFileName:", arg) // prints "ping"
+    // 保存文件
+    ipcMain.on('saveFile', (event, arg) => {
+        console.log("main - saveFile:", arg);
         save(arg)
     })
 }
-
+// 创建完毕后监听
 app.on('ready', function () {
+    const fileName = process.argv[1];
+    const cwd = process.cwd();
+    console.log("cwd: %s, fileName: %s", cwd, fileName);
+    // 文件路径
+    var filePath;
+    if (fileName != null && fileName != undefined && fileName.endsWith('.md')) {
+        // 如果不是绝对路径，则需要拼接地址
+        if (!path.isAbsolute(fileName)) {
+            filePath = path.join(cwd, fileName);
+        } else {
+            filePath = fileName;
+        }
+        storage.setItem("file-name", filePath)
+    }
     const menu = Menu.buildFromTemplate(template)
-    Menu.setApplicationMenu(menu) // 设置菜单部分
+    // 设置菜单部分
+    Menu.setApplicationMenu(menu)
     createWindow();
-})
+});
 
-app.on('window-all-closed', function () {
-    if (process.platform !== 'darwin') app.quit()
-})
-
+// 窗口激活监听
 app.on('activate', function () {
     if (mainWindow === null) createWindow()
 })
 
+// 浏览器窗口创建监听
 app.on('browser-window-created', function () {
     let reopenMenuItem = findReopenMenuItem()
     if (reopenMenuItem) reopenMenuItem.enabled = false
 })
 
+// 窗口关闭监听
 app.on('window-all-closed', function () {
+    storage.removeItem("file-name")
     let reopenMenuItem = findReopenMenuItem()
     if (reopenMenuItem) reopenMenuItem.enabled = true
+
     app.quit()
 });
 
+// 变更主题监听
 ipcMain.handle('dark-mode:toggle', () => {
     if (nativeTheme.shouldUseDarkColors) {
         nativeTheme.themeSource = 'light'
@@ -100,14 +121,14 @@ ipcMain.handle('dark-mode:toggle', () => {
     }
     return nativeTheme.shouldUseDarkColors;
 });
-
+// 变更主题模式监听
 ipcMain.handle('dark-mode:system', () => {
     nativeTheme.themeSource = 'system'
 });
 
+// 打开文件
+function openFile() {
 
-function openFile(focusedWindow) {
-    
     dialog.showOpenDialog(mainWindow, {
         title: "打开文件",
         properties: ['openFile'],
@@ -116,30 +137,25 @@ function openFile(focusedWindow) {
             { name: 'All Files', extensions: ['*'] }
         ]
     }).then(result => {
-        console.log(result.canceled)
-        console.log(result.filePaths)
+        console.log("result: ", result);
         // 读取文件内容
-        const fs = require("fs");
         const files = result.filePaths;
         if (files && files.length >= 1) {
             const file = files[0];
-            console.log("file:", file);
-            storage.setItem("file-name", file)
-            console.log(file)
             const content = fs.readFileSync(file);
-            console.log(content.toString());
-            console.log(mainWindow)
-            focusedWindow.webContents.send('open_file', content.toString());
-
+            console.log("file-name: %s, content: %s", file, content.toString());
+            storage.setItem("file-name", file);            
+            mainWindow.webContents.send('open-file', content.toString());
         }
 
     }).catch(err => {
-        console.log(err)
+        console.log("err info:", err)
     })
 }
 
+// 保存文件
 function save(path) {
-    console.log("main - path:", path)
+    console.log("main - save path:", path)
     dialog.showSaveDialog({
         title: '保存文件',
         defaultPath: path,
@@ -148,16 +164,16 @@ function save(path) {
             { name: 'All Files', extensions: ['*'] }
         ]
     }).then(result => {
-        console.log(result);
+        console.log("result: ", result);
         if (!result.canceled) {
             storage.setItem("file-name", result.filePath)
             BrowserWindow.getFocusedWindow().webContents.send('save-file', result.filePath);
         } else {
             console.log("user canceled")
         }
-        
+
     }).catch(err => {
-        console.log(err);
+        console.log("err info:", err);
     })
 }
 
@@ -180,32 +196,31 @@ let template = [
             label: '打开',
             accelerator: 'CmdOrCtrl+O',
             role: 'open',
-            click: function (item, focusedWindow) {
-                openFile(focusedWindow);
+            click: function () {
+                openFile();
             }
         }, {
             label: '保存',
             accelerator: 'CmdOrCtrl+S',
             role: 'save',
             click: function (item, focusedWindow) {
-                console.log(focusedWindow)
                 console.log(item)
                 var fileName = storage.getItem("file-name")
                 console.log("fileName: ", fileName)
                 if (fileName === undefined || fileName === null || fileName === '') {
-                    focusedWindow.webContents.send('file_name');
+                    console.log("fileName not exist")
+                    focusedWindow.webContents.send('get-file-name');
                 } else {
+                    console.log("fileName exist")
                     focusedWindow.webContents.send('save-file', fileName);
                 }
-                
                 console.log(storage.getItem("file-name"))
-                //save(storage.getItem("file-name"), focusedWindow)
             }
         }, {
             label: '重新加载',
             accelerator: 'CmdOrCtrl+R',
             role: 'reload',
-            click: function (item, focusedWindow) {
+            click: function (focusedWindow) {
                 if (focusedWindow) {
                     // on reload, start fresh and close any old
                     // open secondary windows
@@ -319,11 +334,6 @@ let template = [
             click: function () {
                 console.log("代码块")
             }
-        }, {
-            label: '编辑器',
-            click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../codemirror-index.html'))
-            }
         }]
     },
     {
@@ -332,10 +342,10 @@ let template = [
         submenu: [{
             label: '加粗',
             accelerator: 'CmdOrCtrl+B'
-      
+
         }, {
             label: '斜线',
-            accelerator: 'CmdOrCtrl+I' 
+            accelerator: 'CmdOrCtrl+I'
 
         }, {
             label: '下划线',
@@ -344,7 +354,7 @@ let template = [
         }, {
             label: '代码',
             accelerator: 'CmdOrCtrl+shift+`'
-            
+
         }, {
             label: '删除线',
             accelerator: 'CmdOrCtrl+alt+D'
@@ -352,18 +362,13 @@ let template = [
         }, {
             label: '超链接',
             accelerator: 'CmdOrCtr+K'
-            
+
         }, {
             label: '图片',
             accelerator: 'CmdOrCtrl+alt+I'
-            
+
         }, {
             type: 'separator'
-        }, {
-            label: '首页',
-            click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../inedex.html'))
-            }
         }]
     },
     {
@@ -380,18 +385,17 @@ let template = [
             })(),
             click: function (item, focusedWindow) {
                 if (focusedWindow) {
-                    focusedWindow.toggleDevTools()
+                    focusedWindow.webContents.openDevTools({
+                        mode: 'bottom'
+                    });
                 }
             }
         }, {
-            label: 'vditor',
+            label: '显示/隐藏侧边栏',
+            accelerator: 'CmdOrCtrl+shift+L',
             click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../vditor-index.html'))
-            }
-        }, {
-            label: 'hyperMD',
-            click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../index-hyperMD.html'))
+                console.log("撤销");
+                BrowserWindow.getFocusedWindow().webContents.send('md-hot-key-no-value', "sidebar");
             }
         }]
     },
@@ -400,12 +404,12 @@ let template = [
         role: 'help',
         submenu: [{
             label: '主题样式',
-            click: function ()  {
-                
+            click: function () {
+
             }
         }, {
             label: '主题切换',
-            click: function ()  {
+            click: function () {
                 console.log(nativeTheme.themeSource)
                 BrowserWindow.getFocusedWindow().webContents.send('theme-chanage');
             }
@@ -416,7 +420,7 @@ let template = [
         role: 'help',
         submenu: [{
             label: '项目信息',
-            click: function ()  {
+            click: function () {
                 electron.shell.openExternal('https://github.com/Syske/syskedown')
             }
         }, {
@@ -426,8 +430,8 @@ let template = [
             }
         }, {
             label: '关于',
-            click: function ()  {
-                   
+            click: function () {
+
             }
         }]
     }
