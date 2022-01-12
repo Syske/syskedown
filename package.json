@@ -46,7 +46,11 @@
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "icon",
+        "asar": true,
+        "overwrite": true
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
