@@ -34,7 +34,7 @@
     "jquery": "^3.6.0",
     "codemirror": "^5.37.0",
     "hypermd": "^0.3.11",
-    "vditor": "^3.8.8"
+    "vditor": "^3.8.11"
   },
   "bugs": {
     "url": "https://github.com/electron/electron-quick-start/issues"
