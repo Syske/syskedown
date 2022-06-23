@@ -26,7 +26,7 @@
     "babel-cli": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "css-loader": "^6.6.0",
-    "electron": "^16.0.7",
+    "electron": "^19.0.6",
     "electron-localstorage": "^1.0.5",
     "es6-uuid": "^1.0.1",
     "style-loader": "^3.3.1",
