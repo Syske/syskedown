@@ -31,7 +31,7 @@
     "es6-uuid": "^1.0.1",
     "style-loader": "^3.3.3",
     "url-loader": "^4.1.1",
-    "jquery": "^3.7.0",
+    "jquery": "^3.7.1",
     "codemirror": "^5.65.11",
     "hypermd": "^0.3.11",
     "vditor": "^3.9.2"
