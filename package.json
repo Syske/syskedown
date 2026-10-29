@@ -12,7 +12,6 @@
     "start": "electron-vite build && electron ."
   },
   "dependencies": {
-    "electron-localstorage": "^1.0.5",
     "es6-uuid": "^1.0.1",
     "jquery": "^3.7.0",
     "vditor": "^3.9.2"

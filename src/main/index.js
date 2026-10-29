@@ -3,12 +3,16 @@ import { createMainWindow } from './window.js'
 import { buildApplicationMenu, findReopenMenuItem } from './menu.js'
 import { registerIpc } from './ipc.js'
 import { executeCommand } from './commands.js'
+import { initStore } from './services/store.js'
+import { initTheme } from './services/theme-service.js'
 
 if (process.mas) app.setName('syskedown - 开源、易用的markdown编辑器')
 
 let mainWindow = null
 
 app.on('ready', function () {
+    initStore() // 先于任何 recentFile / themeSource 读取（含旧 db.json 只读迁移）
+    initTheme()
     const menu = buildApplicationMenu({
         getWindow: () => mainWindow,
         exec: executeCommand
