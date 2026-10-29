@@ -1,15 +1,19 @@
-const path = require('path')
-const fs = require("fs");
-const storage = require('electron-localstorage')
-window.$ = window.jQuery = require("jquery");
+// 渲染层入口（T-001 行为等价迁移自旧 src/vditor.js；T-003 将整体重写为 window.api 链路）
+import Vditor from 'vditor'
+import 'vditor/dist/index.css'
+import $ from 'jquery'
 
-storage.setStoragePath(path.join(__dirname, './dist/db.json'))
+window.$ = window.jQuery = $
 
-// new VConsole()
+// nodeIntegration 仍在（T-003 将关闭）：过渡期经 window.require 访问 electron / fs
+const { ipcRenderer } = window.require('electron')
+const fs = window.require('fs')
+
 var vditor;
+
 window.onload = function () {
   vditor = new Vditor('vditor', {
-    cdn: './vditor',
+    cdn: '.',
     placeholder: 'Hello, Vditor!',
     typewriterMode: true,
     toolbar: [],
@@ -21,13 +25,9 @@ window.onload = function () {
       type: 'text',
     }
   });
-  document.getElementById('vditor').append(vditor);
 }
 
-const { ipcRenderer } = require('electron')
-
 ipcRenderer.on('save-file', (event, arg) => {
-  console.log(vditor.getValue());
   fs.writeFile(arg, vditor.getValue(), "utf-8", (err) => {
     if (err) {
       event.sender.send("asynchronous-reply", "写入失败");
@@ -38,21 +38,12 @@ ipcRenderer.on('save-file', (event, arg) => {
 });
 
 ipcRenderer.on('open_file', (event, arg) => {
-  console.log(arg);
-  console.log(event);
   vditor.setValue(arg);
-  const storagePath = storage.getStoragePath();
-  const sessionId = storage.getItem('sessionId');
-  console.log(sessionId);
-  console.log(storagePath);
-  console.log(storage.getItem("file-name"))
-})
+});
 
 ipcRenderer.on('file_name', (event, arg) => {
-  console.log(arg) // prints "ping"
   var reg = /ir-(.*)_[0-9]{0,2}/;
   var match = reg.exec($("h1, h2, h3, h4, h5, h6, p")[0].id)
-  console.log(match)
   var fileName = match[1]
   if (fileName == null || fileName == 'undefined' || fileName == '') {
     fileName = "Untitled"
@@ -61,31 +52,26 @@ ipcRenderer.on('file_name', (event, arg) => {
 });
 
 ipcRenderer.on('md-hot-key', (event, arg) => {
-  console.log(event)
-  console.log(arg)
   vditor.processHeading(arg);
 });
 
 ipcRenderer.on('md-hot-key-no-value', (event, arg) => {
-  console.log(arg)
-  console.log(event)
   if (arg === 'undo') {
     vditor.vditor.undo.undo(vditor.vditor)
   }
   if (arg === 'redo') {
     vditor.vditor.undo.redo(vditor.vditor)
   }
-  
+
 });
 
 ipcRenderer.on('theme-chanage', () => {
   const isDarkMode = ipcRenderer.invoke('dark-mode:toggle')
-  console.log("isDarkMode:", isDarkMode);
   if (isDarkMode) {
-    window.vditor.setTheme('dark', 'dark',  'native');
+    vditor.setTheme('dark', 'dark',  'native');
     document.querySelector('body').style.backgroundColor='#2f363d'
   } else {
-    window.vditor.setTheme('light', 'light', 'github');
+    vditor.setTheme('light', 'light', 'github');
     document.querySelector('body').style.backgroundColor=''
   }
 });

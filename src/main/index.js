@@ -1,12 +1,10 @@
-const path = require('path')
-const electron = require("electron")
-const app = electron.app
-const BrowserWindow = electron.BrowserWindow
-const { ipcMain, nativeTheme } = require("electron")
-const Menu = electron.Menu
-const UUID = require("es6-uuid");
-const storage = require('electron-localstorage')
-const { dialog } = require('electron')
+import path from 'node:path'
+import fs from 'node:fs'
+import { app, BrowserWindow, Menu, ipcMain, nativeTheme, dialog, shell } from 'electron'
+import UUID from 'es6-uuid'
+import storage from 'electron-localstorage'
+import jQuery from 'jquery'
+
 storage.setStoragePath(path.join(__dirname, 'db.json'))
 
 if (process.mas) app.setName('syskedown - 开源、易用的markdown编辑器')
@@ -14,7 +12,6 @@ if (process.mas) app.setName('syskedown - 开源、易用的markdown编辑器')
 let mainWindow;
 
 function createWindow() {
-    console.log('主进程日志')
     let windowOptions = {
         width: 1220,
         height: 780,
@@ -25,8 +22,7 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            enabledRemoteModule: true,
-            preload: path.join('/preload.js')
+            preload: path.join(__dirname, '../preload/index.js')
         }
     }
 
@@ -35,8 +31,13 @@ function createWindow() {
     }
 
     mainWindow = new BrowserWindow(windowOptions);
-    console.log(__dirname)
-    mainWindow.loadURL(path.join('file://', __dirname, '../vditor-index.html'))
+
+    // electron-vite: dev 走开发服务器（HMR），生产加载打包后的渲染入口
+    if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
+        mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    } else {
+        mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
+    }
 
     mainWindow.on('closed', function () {
         mainWindow = null
@@ -45,11 +46,11 @@ function createWindow() {
     mainWindow.webContents.openDevTools({
         mode: 'bottom'
     });
-    mainWindow.$ = mainWindow.jQuery = require("jquery");
+    mainWindow.$ = mainWindow.jQuery = jQuery;
     const sessionId = UUID(32);
     console.log("session-id", sessionId);
     storage.setItem("sessionId", sessionId)
-    
+
 
     // 在主进程中.
     ipcMain.on('asynchronous-message', (event, arg) => {
@@ -86,12 +87,6 @@ app.on('browser-window-created', function () {
     if (reopenMenuItem) reopenMenuItem.enabled = false
 })
 
-app.on('window-all-closed', function () {
-    let reopenMenuItem = findReopenMenuItem()
-    if (reopenMenuItem) reopenMenuItem.enabled = true
-    app.quit()
-});
-
 ipcMain.handle('dark-mode:toggle', () => {
     if (nativeTheme.shouldUseDarkColors) {
         nativeTheme.themeSource = 'light'
@@ -107,7 +102,7 @@ ipcMain.handle('dark-mode:system', () => {
 
 
 function openFile(focusedWindow) {
-    
+
     dialog.showOpenDialog(mainWindow, {
         title: "打开文件",
         properties: ['openFile'],
@@ -116,21 +111,13 @@ function openFile(focusedWindow) {
             { name: 'All Files', extensions: ['*'] }
         ]
     }).then(result => {
-        console.log(result.canceled)
-        console.log(result.filePaths)
         // 读取文件内容
-        const fs = require("fs");
         const files = result.filePaths;
         if (files && files.length >= 1) {
             const file = files[0];
-            console.log("file:", file);
             storage.setItem("file-name", file)
-            console.log(file)
             const content = fs.readFileSync(file);
-            console.log(content.toString());
-            console.log(mainWindow)
             focusedWindow.webContents.send('open_file', content.toString());
-
         }
 
     }).catch(err => {
@@ -139,7 +126,6 @@ function openFile(focusedWindow) {
 }
 
 function save(path) {
-    console.log("main - path:", path)
     dialog.showSaveDialog({
         title: '保存文件',
         defaultPath: path,
@@ -148,14 +134,13 @@ function save(path) {
             { name: 'All Files', extensions: ['*'] }
         ]
     }).then(result => {
-        console.log(result);
         if (!result.canceled) {
             storage.setItem("file-name", result.filePath)
             BrowserWindow.getFocusedWindow().webContents.send('save-file', result.filePath);
         } else {
             console.log("user canceled")
         }
-        
+
     }).catch(err => {
         console.log(err);
     })
@@ -188,18 +173,12 @@ let template = [
             accelerator: 'CmdOrCtrl+S',
             role: 'save',
             click: function (item, focusedWindow) {
-                console.log(focusedWindow)
-                console.log(item)
                 var fileName = storage.getItem("file-name")
-                console.log("fileName: ", fileName)
                 if (fileName === undefined || fileName === null || fileName === '') {
                     focusedWindow.webContents.send('file_name');
                 } else {
                     focusedWindow.webContents.send('save-file', fileName);
                 }
-                
-                console.log(storage.getItem("file-name"))
-                //save(storage.getItem("file-name"), focusedWindow)
             }
         }, {
             label: '重新加载',
@@ -240,14 +219,12 @@ let template = [
             label: '撤销',
             accelerator: 'CmdOrCtrl+Z',
             click: function () {
-                console.log("撤销");
                 BrowserWindow.getFocusedWindow().webContents.send('md-hot-key-no-value', "undo");
             }
         }, {
             label: '重做',
             accelerator: 'CmdOrCtrl+Y',
             click: function () {
-                console.log("重做");
                 BrowserWindow.getFocusedWindow().webContents.send('md-hot-key-no-value', "redo");
             }
         }, {
@@ -273,42 +250,36 @@ let template = [
             label: '一级目录',
             accelerator: 'CmdOrCtrl+1',
             click: function () {
-                console.log("一级目录");
                 BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "# ");
             }
         }, {
             label: '二级目录',
             accelerator: 'CmdOrCtrl+2',
             click: function () {
-                console.log("二级目录")
                 BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "## ");
             }
         }, {
             label: '三级目录',
             accelerator: 'CmdOrCtrl+3',
             click: function () {
-                console.log("三级目录")
                 BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "### ");
             }
         }, {
             label: '四级目录',
             accelerator: 'CmdOrCtrl+4',
             click: function () {
-                console.log("四级目录")
                 BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "#### ");
             }
         }, {
             label: '五级目录',
             accelerator: 'CmdOrCtrl+5',
             click: function () {
-                console.log("五级目录")
                 BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "##### ");
             }
         }, {
             label: '六级目录',
             accelerator: 'CmdOrCtrl+6',
             click: function () {
-                console.log("六级目录")
                 BrowserWindow.getFocusedWindow().webContents.send('md-hot-key', "###### ");
             }
         }, {
@@ -317,12 +288,11 @@ let template = [
             label: '代码块',
             accelerator: 'CmdOrCtrl+Shift+k',
             click: function () {
-                console.log("代码块")
             }
         }, {
             label: '编辑器',
             click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../codemirror-index.html'))
+                mainWindow.loadURL(path.join('file://', __dirname, '../../codemirror-index.html'))
             }
         }]
     },
@@ -332,10 +302,10 @@ let template = [
         submenu: [{
             label: '加粗',
             accelerator: 'CmdOrCtrl+B'
-      
+
         }, {
             label: '斜线',
-            accelerator: 'CmdOrCtrl+I' 
+            accelerator: 'CmdOrCtrl+I'
 
         }, {
             label: '下划线',
@@ -344,7 +314,7 @@ let template = [
         }, {
             label: '代码',
             accelerator: 'CmdOrCtrl+shift+`'
-            
+
         }, {
             label: '删除线',
             accelerator: 'CmdOrCtrl+alt+D'
@@ -352,17 +322,17 @@ let template = [
         }, {
             label: '超链接',
             accelerator: 'CmdOrCtr+K'
-            
+
         }, {
             label: '图片',
             accelerator: 'CmdOrCtrl+alt+I'
-            
+
         }, {
             type: 'separator'
         }, {
             label: '首页',
             click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../inedex.html'))
+                mainWindow.loadURL(path.join('file://', __dirname, '../../inedex.html'))
             }
         }]
     },
@@ -386,12 +356,16 @@ let template = [
         }, {
             label: 'vditor',
             click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../vditor-index.html'))
+                if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
+                    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+                } else {
+                    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
+                }
             }
         }, {
             label: 'hyperMD',
             click: function () {
-                mainWindow.loadURL(path.join('file://', __dirname, '../index-hyperMD.html'))
+                mainWindow.loadURL(path.join('file://', __dirname, '../../index-hyperMD.html'))
             }
         }]
     },
@@ -401,12 +375,11 @@ let template = [
         submenu: [{
             label: '主题样式',
             click: function ()  {
-                
+
             }
         }, {
             label: '主题切换',
             click: function ()  {
-                console.log(nativeTheme.themeSource)
                 BrowserWindow.getFocusedWindow().webContents.send('theme-chanage');
             }
         }]
@@ -417,17 +390,17 @@ let template = [
         submenu: [{
             label: '项目信息',
             click: function ()  {
-                electron.shell.openExternal('https://github.com/Syske/syskedown')
+                shell.openExternal('https://github.com/Syske/syskedown')
             }
         }, {
             label: '意见反馈',
             click: function () {
-                electron.shell.openExternal('https://github.com/Syske/syskedown/issues')
+                shell.openExternal('https://github.com/Syske/syskedown/issues')
             }
         }, {
             label: '关于',
             click: function ()  {
-                   
+
             }
         }]
     }
@@ -439,7 +412,7 @@ let template = [
 function addUpdateMenuItems(items, position) {
     if (process.mas) return
 
-    const version = electron.app.getVersion()
+    const version = app.getVersion()
     let updateItems = [{
         label: `Version ${version}`,
         enabled: false
@@ -486,7 +459,7 @@ function findReopenMenuItem() {
 
 // 针对Mac端的一些配置
 if (process.platform === 'darwin') {
-    const name = electron.app.getName()
+    const name = app.getName()
     template.unshift({
         label: name,
         submenu: [{
@@ -514,4 +487,3 @@ if (process.platform === 'win32') {
     const helpMenu = template[template.length - 1].submenu
     addUpdateMenuItems(helpMenu, 0)
 }
-
