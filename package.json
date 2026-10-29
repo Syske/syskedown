@@ -14,8 +14,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "es6-uuid": "^1.0.1",
-    "jquery": "^3.7.0",
     "vditor": "^3.9.2"
   },
   "devDependencies": {

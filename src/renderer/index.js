@@ -1,20 +1,18 @@
-// 渲染层装配（T-003 契约版）：全部跨进程调用经 window.api（preload 白名单）。
-// 编辑器适配层抽象在 T-007 引入；本文件为迁移后的直接实现。
+// 渲染层装配（T-007 契约版）：编辑器经 adapter 抽象，跨进程调用经 window.api。
 
-import Vditor from 'vditor'
-import 'vditor/dist/index.css'
+import { createVditorAdapter } from './editor/vditor-adapter.js'
 
 const api = window.api
 
-var vditor
+var editor
 
 function applyTheme(isDark) {
-  vditor.setTheme(isDark ? 'dark' : 'light', isDark ? 'dark' : 'light', isDark ? 'native' : 'github')
+  editor.setTheme(isDark)
   document.querySelector('body').style.backgroundColor = isDark ? '#2f363d' : ''
 }
 
 window.onload = function () {
-  vditor = new Vditor('vditor', {
+  editor = createVditorAdapter('vditor', {
     cdn: '.',
     placeholder: 'Hello, Vditor!',
     typewriterMode: true,
@@ -37,7 +35,7 @@ window.onload = function () {
 
 // 打开文件：主进程广播 file:opened（契约 §4）
 api.onFileOpened(({ content }) => {
-  vditor.setValue(content)
+  editor.setValue(content)
 })
 
 // 保存成功提示位（现行为：无 UI 提示，保持等价；结构化结果已可用）
@@ -54,10 +52,10 @@ api.onThemeChanged(({ isDark }) => {
 api.onAppCommand(({ id }) => {
   switch (id) {
     case 'save': {
-      api.saveFile({ content: vditor.getValue() }).then(res => {
+      api.saveFile({ content: editor.getValue() }).then(res => {
         if (!res.ok && res.error.code === 'E-NO-PATH') {
           // 无保存目标 → 自动转另存为
-          return api.saveFileAs({ content: vditor.getValue() })
+          return api.saveFileAs({ content: editor.getValue() })
         }
         if (!res.ok) {
           console.warn('[save failed]', res.error)
@@ -66,15 +64,12 @@ api.onAppCommand(({ id }) => {
       break
     }
     case 'undo':
-      vditor.vditor.undo.undo(vditor.vditor)
-      break
     case 'redo':
-      vditor.vditor.undo.redo(vditor.vditor)
+      editor.exec(id)
       break
     default: {
-      const m = /^heading-([1-6])$/.exec(id)
-      if (m) {
-        vditor.processHeading('#'.repeat(Number(m[1])) + ' ')
+      if (/^heading-[1-6]$/.test(id)) {
+        editor.exec(id)
       } else {
         console.warn('[app:command] unknown id ignored:', id)
       }

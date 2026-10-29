@@ -1,6 +1,5 @@
 import { shell } from 'electron'
 import { COMMAND_ID } from '../shared/ipc-channels.js'
-import { loadEditorPage, loadLegacyPage } from './window.js'
 import { sendAppCommand, openViaMenu, toggleThemeMenu } from './ipc.js'
 
 // 命令注册表：菜单/快捷键 → 主进程动作或 app:command 渲染层转发。
@@ -45,12 +44,6 @@ export function executeCommand(win, id) {
             return sendAppCommand(win, id)
         case COMMAND_ID.THEME_TOGGLE:
             return toggleThemeMenu(win)
-        case COMMAND_ID.EDITOR_VDITOR:
-            return loadEditorPage(win)
-        case COMMAND_ID.EDITOR_CODEMIRROR:
-            return loadLegacyPage(win, 'codemirror-index.html')
-        case COMMAND_ID.EDITOR_HYPERMD:
-            return loadLegacyPage(win, 'index-hyperMD.html')
         case COMMAND_ID.PROJECT_HOME:
             return shell.openExternal('https://github.com/Syske/syskedown')
         case COMMAND_ID.FEEDBACK:

@@ -40,8 +40,7 @@ function menuTemplate() {
                 { label: '五级目录', accelerator: 'CmdOrCtrl+5', command: COMMANDS.HEADING_5 },
                 { label: '六级目录', accelerator: 'CmdOrCtrl+6', command: COMMANDS.HEADING_6 },
                 { type: 'separator' },
-                { label: '代码块（未实现）', accelerator: 'CmdOrCtrl+Shift+k' },
-                { label: '编辑器', command: COMMANDS.EDITOR_CODEMIRROR }
+                { label: '代码块（未实现）', accelerator: 'CmdOrCtrl+Shift+k' }
             ]
         },
         {
@@ -63,9 +62,7 @@ function menuTemplate() {
                     label: '切换开发者工具',
                     accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
                     role: 'toggleDevTools'
-                },
-                { label: 'vditor', command: COMMANDS.EDITOR_VDITOR },
-                { label: 'hyperMD', command: COMMANDS.EDITOR_HYPERMD }
+                }
             ]
         },
         {

@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { BrowserWindow, app } from 'electron'
 
-// 窗口创建与页面装载（T-002 自 index.js 拆出，行为等价）
+// 窗口创建与页面装载
 export function createMainWindow() {
     const windowOptions = {
         width: 1220,
@@ -36,9 +36,4 @@ export function loadEditorPage(win) {
     } else {
         win.loadFile(path.join(__dirname, '../renderer/index.html'))
     }
-}
-
-// 旧原型页装载（codemirror/hyperMD 试验页保留至 T-007 删除）
-export function loadLegacyPage(win, fileName) {
-    win.loadURL(path.join('file://', __dirname, '../..', fileName))
 }

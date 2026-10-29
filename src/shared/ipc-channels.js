@@ -32,9 +32,6 @@ export const COMMAND_ID = {
   HEADING_5: 'heading-5',
   HEADING_6: 'heading-6',
   CODE_BLOCK: 'code-block',
-  EDITOR_CODEMIRROR: 'editor-codemirror',
-  EDITOR_VDITOR: 'editor-vditor',
-  EDITOR_HYPERMD: 'editor-hypermd',
   THEME_TOGGLE: 'theme-toggle',
   PROJECT_HOME: 'project-home',
   FEEDBACK: 'feedback'
