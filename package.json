@@ -11,7 +11,9 @@
     "preview": "electron-vite preview",
     "start": "electron-vite build && electron .",
     "lint": "eslint src/ tests/",
-    "test": "vitest run"
+    "test": "vitest run",
+    "package": "electron-vite build && electron-builder --win",
+    "package:dir": "electron-vite build && electron-builder --dir"
   },
   "dependencies": {
     "vditor": "^3.9.2"
@@ -19,6 +21,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "electron": "^45.1.0",
+    "electron-builder": "^26.18.0",
     "electron-vite": "^6.0.0",
     "eslint": "^10.13.0",
     "vite": "^7.0.0",

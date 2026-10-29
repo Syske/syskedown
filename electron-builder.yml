@@ -1,0 +1,14 @@
+appId: com.syske.syskedown
+productName: syskedown
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**
+  - package.json
+asar: true
+win:
+  target:
+    - nsis
+# 图标: 待提供 >=256x256 的 build/icon.png（当前 logo.png 为 362x113 非方形，不满足）；
+# 未配置时 electron-builder 使用默认图标，构建可用（T-008 外部动作项）。
