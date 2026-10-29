@@ -1,5 +1,5 @@
 import { app, Menu } from 'electron'
-import { COMMANDS } from './constants.js'
+import { COMMAND_ID as COMMANDS } from '../shared/ipc-channels.js'
 
 // 菜单 = 纯数据（label/accelerator/command 或系统 role）。
 // 修正项（T-002）：role 误用移除（'window'/'help'）、CmdOrCtr 拼写、

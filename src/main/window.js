@@ -11,8 +11,10 @@ export function createMainWindow() {
         title: app.getName(),
         themeSource: 'dark',
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
+            // 安全基线（官方清单 #2/#3/#4；T-003 与渲染层 window.api 迁移原子闭合）
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: true,
             preload: path.join(__dirname, '../preload/index.js')
         }
     }
