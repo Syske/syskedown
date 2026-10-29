@@ -12,7 +12,14 @@ const MD_FILTERS = [
 ]
 
 function readUtf8(p) {
-    const content = fs.readFileSync(p, 'utf-8')
+    let content
+    try {
+        content = fs.readFileSync(p, 'utf-8')
+    } catch (e) {
+        const err = new Error(`read failed: ${e.code || e.message}`)
+        err.code = ERR.READ
+        throw err
+    }
     if (content.includes('\uFFFD')) {
         const err = new Error('not valid utf-8 text')
         err.code = ERR.READ
@@ -22,7 +29,13 @@ function readUtf8(p) {
 }
 
 function writeUtf8(p, content) {
-    fs.writeFileSync(p, content, 'utf-8')
+    try {
+        fs.writeFileSync(p, content, 'utf-8')
+    } catch (e) {
+        const err = new Error(`write failed: ${e.code || e.message}`)
+        err.code = ERR.WRITE
+        throw err
+    }
 }
 
 export function getRecentFile() {
