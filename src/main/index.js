@@ -1,6 +1,6 @@
 import { app, Menu } from 'electron'
 import { createMainWindow } from './window.js'
-import { buildApplicationMenu, findReopenMenuItem } from './menu.js'
+import { buildApplicationMenu, findReopenMenuItem } from './app-menu.js'
 import { registerIpc } from './ipc.js'
 import { executeCommand } from './commands.js'
 import { initStore } from './services/store.js'
